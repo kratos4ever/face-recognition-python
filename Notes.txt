@@ -1,0 +1,6 @@
+1. Load the facial recognition model file
+2. Start the main loop -> 
+
+If the prediction score for the face is less than 1200 -> then set 
+the name as 'unidentified person'
+

@@ -52,7 +52,7 @@ model.train(images, lables)
 
 # Part 2: Use fisherRecognizer on camera stream
 haar_cascade = cv2.CascadeClassifier(fn_haar)
-webcam = cv2.VideoCapture(0)
+webcam = cv2.VideoCapture(1)
 
 # Find OpenCV version
 (major_ver, minor_ver, subminor_ver) = (cv2.__version__).split('.')

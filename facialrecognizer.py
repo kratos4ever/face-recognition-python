@@ -65,7 +65,7 @@ def trainFaceRec():
 	# NOTE FOR OpenCV2: remove '.face'
 	model = cv2.createFisherFaceRecognizer()
 	model.train(images, lables)
-	#model.save("./face-model.xml")
+	model.save("./face-model.xml")
 	return model	
 
 

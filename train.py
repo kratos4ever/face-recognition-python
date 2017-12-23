@@ -13,7 +13,7 @@ if not os.path.isdir(path):
     os.mkdir(path)
 (im_width, im_height) = (112, 92)
 haar_cascade = cv2.CascadeClassifier(fn_haar)
-webcam = cv2.VideoCapture(0)
+webcam = cv2.VideoCapture(1)
 
 # Generate name for image file
 pin=sorted([int(n[:n.find('.')]) for n in os.listdir(path)

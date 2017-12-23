@@ -11,7 +11,7 @@ fn_dir = 'att_faces'
 
 
 #call the face model loading method
-webcam = cv2.VideoCapture(0)
+webcam = cv2.VideoCapture(1)
 model = prepareFacialModel()
 #webcam = cv2.VideoCapture("rtsp://184.72.239.149/vod/mp4:BigBuckBunny_175k.mov")
 
@@ -31,14 +31,19 @@ while True:
     now = datetime.datetime.now()
     #print now.strftime("%d%b%Y_%H%M%S")
 
-    cv2.imshow('OpenCV', frame)
     path = "./temp/agent_"+now.strftime("%m%d%Y_%H%M%S_%f")+".png"
     cv2.imwrite(path,frame)
 
     desk_classification, desk_probab = deskClassify(path)
     print("classification %s - probability %f" % (desk_classification,desk_probab))
-    
-    #invoke threads to process the various pipelines (which save results independently - then )
+
+    cv2.putText(frame,'Status: %s - p:%f'% (desk_classification,desk_probab),(30,60),cv2.FONT_HERSHEY_PLAIN,1,(255, 0, 0))
+    cv2.imshow('OpenCV', frame)
+
+    #delete the image file
+    os.remove(path)
+    if(desk_classification != "working_compliant"):
+        cv2.imwrite(path,frame) #save it with the status if not compliant in any way
 
     #time.sleep(.1)
     

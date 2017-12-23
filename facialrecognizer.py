@@ -65,13 +65,16 @@ def trainFaceRec():
 	# NOTE FOR OpenCV2: remove '.face'
 	model = cv2.createFisherFaceRecognizer()
 	model.train(images, lables)
+	#model.save("./face-model.xml")
 	return model	
 
 
 def prepareFacialModel():
+	faceRecModel = cv2.createFisherFaceRecognizer()
+
 	faceRecModelFile = Path("./face-model.xml")
 	if(faceRecModelFile.is_file()):
-		faceRecModel.load(faceRecModelFile)
+		faceRecModel.load("./face-model.xml")
 	else:
 		faceRecModel = trainFaceRec()
 
@@ -87,7 +90,11 @@ def runFaceRecognition(frame,model):
 
     # Detect faces and loop through each one
     faces = haar_cascade.detectMultiScale(mini)
-    cv2.putText(frame,'Num faces detected: %d' % len(faces),(30,30),cv2.FONT_HERSHEY_PLAIN,1,(0, 0, 0))
+    if(len(faces) > 0):
+    	cv2.putText(frame,'Status: Occupied, Num faces detected: %d' % len(faces),(30,30),cv2.FONT_HERSHEY_PLAIN,1,(0, 0, 0))
+    else:
+    	cv2.putText(frame,'Status: Unoccupied',(30,30),cv2.FONT_HERSHEY_PLAIN,1,(0, 0, 0))
+
     for i in range(len(faces)):
         face_i = faces[i]
 
@@ -100,7 +107,7 @@ def runFaceRecognition(frame,model):
         prediction = model.predict(face_resize)
         cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 3)
 
-        print(prediction)
+        #print(prediction)
         # [1]
         # Write the name of recognized face
         cv2.putText(frame,
@@ -108,3 +115,6 @@ def runFaceRecognition(frame,model):
            (x-10, y-10), cv2.FONT_HERSHEY_PLAIN,1,(0, 255, 0))
         #push to a rabbitmq/
         #set of actions of agent -> 
+
+if __name__ == '__main__':
+	trainFaceRec()

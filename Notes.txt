@@ -2,5 +2,14 @@
 2. Start the main loop -> 
 
 If the prediction score for the face is less than 1200 -> then set 
-the name as 'unidentified person'
+the name as 'unidentified'
 
+Always train on the s1 as 'unknown' person. so, whatever may be the face that is not 
+the agent's it will be tagged as 'unknown'
+
+Print the length of the faces array as the number of faces detected. -> if it is 
+0, then print the room status as unoccupied
+
+Tensorflow test img
+/home/nishanth/Downloads/agent-desktop-1/working_noncompliantdesk/DSC_1104.JPG
+--

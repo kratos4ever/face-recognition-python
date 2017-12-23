@@ -4,6 +4,7 @@ import datetime
 import time
 from facialrecognizer import prepareFacialModel
 from facialrecognizer import runFaceRecognition
+from deskclassifier import deskClassify
 size = 2
 fn_haar = 'haarcascade_frontalface_default.xml'
 fn_dir = 'att_faces'
@@ -31,10 +32,15 @@ while True:
     #print now.strftime("%d%b%Y_%H%M%S")
 
     cv2.imshow('OpenCV', frame)
-    #cv2.imwrite("./temp/agent_"+now.strftime("%m%d%Y_%H%M%S_%f")+".png",frame)
+    path = "./temp/agent_"+now.strftime("%m%d%Y_%H%M%S_%f")+".png"
+    cv2.imwrite(path,frame)
+
+    desk_classification, desk_probab = deskClassify(path)
+    print("classification %s - probability %f" % (desk_classification,desk_probab))
+    
     #invoke threads to process the various pipelines (which save results independently - then )
 
-    time.sleep(.1)
+    #time.sleep(.1)
     
 
 

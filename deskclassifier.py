@@ -103,4 +103,4 @@ def deskClassify(image_file):
 
   print('\nEvaluation time (1-image): {:.3f}s\n'.format(end-start))
 
-  return (labels[0], results[0])
+  return (labels[top_k[0]], results[top_k[0]])

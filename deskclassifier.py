@@ -35,6 +35,10 @@ def load_graph(model_file):
 
   return graph
 
+model_file = "./agent_desk_v2_graph.pb"
+label_file = "./agent_desk_v1_labels.txt"
+graph = load_graph(model_file)
+ 
 def read_tensor_from_image_file(file_name, input_height=299, input_width=299,
 				input_mean=0, input_std=255):
   input_name = "file_reader"
@@ -68,8 +72,7 @@ def load_labels(label_file):
   return label
 
 def deskClassify(image_file):
-  model_file = "./agent_desk_v2_graph.pb"
-  label_file = "./agent_desk_v1_labels.txt"
+  print("desk-classify imagefile: " + image_file)
   input_height = 224
   input_width = 224
   input_mean = 128
@@ -79,7 +82,6 @@ def deskClassify(image_file):
 
 
 
-  graph = load_graph(model_file)
   t = read_tensor_from_image_file(image_file,
                                   input_height=input_height,
                                   input_width=input_width,
@@ -104,3 +106,14 @@ def deskClassify(image_file):
   print('\nEvaluation time (1-image): {:.3f}s\n'.format(end-start))
 
   return (labels[top_k[0]], results[top_k[0]])
+
+
+if __name__ == "__main__":
+  imagearr = {"/home/nishanth/Downloads/agent-desktop-1/notworking_noncompliantdesk/DSC_1084.JPG",
+  "/home/nishanth/Downloads/agent-desktop-1/working_noncompliantdesk/DSC_1077.JPG",
+  "/home/nishanth/source/face-recognition-python/temp/agent_12232017_072834_962997.png"}
+
+  for s in imagearr:
+    print(deskClassify(s))
+
+

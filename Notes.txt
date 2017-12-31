@@ -13,3 +13,14 @@ Print the length of the faces array as the number of faces detected. -> if it is
 Tensorflow test img
 /home/nishanth/Downloads/agent-desktop-1/working_noncompliantdesk/DSC_1104.JPG
 --
+
+Performane of the deep learning based desk status detection is quite slow - avg over 0.5 sec/image. hard to even keep up with a 2 to 1 frames/sec from the camera.
+OpenCV based? - NOT POSSIBLE
+faster deep learning options than tensorflow? on CPU - OR May be do object detection in the frame using either OpenCV or Deep learning/tensorflow -> if any 
+objects are identified in the frame as paper, pen, tablet, phone, ?? How to detect working vs not working?
+
+
+The results are best viewed as updates vs live stream video with status printed on top, as the framerate is quite low because of the tensorflow based desk/agent status
+classifier.
+
+Live updates can be viewed as discrete messages/rows coming into a table by timestamp with a status mesage and the link of the vide image analyzed. 

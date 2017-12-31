@@ -11,7 +11,7 @@ fn_dir = 'att_faces'
 
 
 #call the face model loading method
-webcam = cv2.VideoCapture(1)
+webcam = cv2.VideoCapture(0)
 model = prepareFacialModel()
 #webcam = cv2.VideoCapture("rtsp://184.72.239.149/vod/mp4:BigBuckBunny_175k.mov")
 
@@ -27,24 +27,27 @@ while True:
             print("Failed to open webcam. Trying again...")
 
     frame=cv2.flip(frame,1,0)
-    runFaceRecognition(frame,model)
+    faceid = runFaceRecognition(frame,model)
     now = datetime.datetime.now()
     #print now.strftime("%d%b%Y_%H%M%S")
 
-    path = "./temp/agent_"+now.strftime("%m%d%Y_%H%M%S_%f")+".png"
-    cv2.imwrite(path,frame)
+    path = "agent_"+now.strftime("%m%d%Y_%H%M%S_%f")+".png"
+    fullpath = "./temp/"+path
+    cv2.imwrite(fullpath,frame)
 
-    desk_classification, desk_probab = deskClassify(path)
+    desk_classification, desk_probab = deskClassify(fullpath)
     print("classification %s - probability %f" % (desk_classification,desk_probab))
 
-    cv2.putText(frame,'Status: %s - p:%f'% (desk_classification,desk_probab),(30,60),cv2.FONT_HERSHEY_PLAIN,1,(255, 0, 0))
+    #cv2.putText(frame,'Status: %s - p:%f'% (desk_classification,desk_probab),(30,60),cv2.FONT_HERSHEY_PLAIN,1,(255, 0, 0))
     cv2.imshow('OpenCV', frame)
 
     #delete the image file
-    os.remove(path)
-    if(desk_classification != "working_compliant"):
-        cv2.imwrite(path,frame) #save it with the status if not compliant in any way
+    os.remove(fullpath)
+    fullpath = "./data/"+desk_classification.replace(" ","_")+"/"+path
+    cv2.imwrite(fullpath,frame) #save it in the proper image folder
 
+    #write to db
+    
     #time.sleep(.1)
     
 

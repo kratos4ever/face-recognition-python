@@ -11,7 +11,7 @@ fn_dir = 'att_faces'
 
 
 #call the face model loading method
-webcam = cv2.VideoCapture(1)
+webcam = cv2.VideoCapture(0)
 model = prepareFacialModel()
 #webcam = cv2.VideoCapture("rtsp://184.72.239.149/vod/mp4:BigBuckBunny_175k.mov")
 

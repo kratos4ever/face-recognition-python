@@ -8,6 +8,7 @@ results = cur.fetchall()
 i = 0
 for rs in results:
 	path = "./temp/train_"+rs[1]+"_%d.jpg"%i
+	path=path.replace("\\","_")
 	i = i+1
 	print path
 	img = open(path,"wb")

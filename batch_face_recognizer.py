@@ -23,7 +23,7 @@ def loadNames():
 loadNames()
 
 #model file paths, for fisher faces recognizer, room occupancy detector intial file, working/notworking model path
-faceRecModel = cv2.createFisherFaceRecognizer()
+faceRecModel = cv2.face.FisherFaceRecognizer_create()
 
 def trainFaceRec():
 	# Part 1: Create fisherRecognizer
@@ -63,18 +63,18 @@ def trainFaceRec():
 
 	# OpenCV trains a model from the images
 	# NOTE FOR OpenCV2: remove '.face'
-	model = cv2.createFisherFaceRecognizer()
+	model = cv2.face.FisherFaceRecognizer_create()
 	model.train(images, lables)
 	model.save("./face-model.xml")
 	return model	
 
 
 def prepareFacialModel():
-	faceRecModel = cv2.createFisherFaceRecognizer()
+	faceRecModel = cv2.face.FisherFaceRecognizer_create()
 
 	faceRecModelFile = Path("./face-model.xml")
 	if(faceRecModelFile.is_file()):
-		faceRecModel.load("./face-model.xml")
+		faceRecModel.read("./face-model.xml")
 	else:
 		faceRecModel = trainFaceRec()
 

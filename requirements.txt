@@ -2,3 +2,8 @@ imutils==0.4.4
 tensorflow==1.4.1
 numpy==1.11.0
 pika==0.11.2
+opencv-contrib-python
+mysql-connector
+pathlib
+pathlib2
+MySQL-python

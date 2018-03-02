@@ -13,3 +13,6 @@ Print the length of the faces array as the number of faces detected. -> if it is
 Tensorflow test img
 /home/nishanth/Downloads/agent-desktop-1/working_noncompliantdesk/DSC_1104.JPG
 --
+
+do pip install for the following packages
+opencv-contrib-python

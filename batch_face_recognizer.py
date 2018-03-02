@@ -105,14 +105,16 @@ def runFaceRecognition(frame,model):
 
         # Try to recognize the face
         prediction = model.predict(face_resize)
-        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 3)
+        #cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 3)
 
         #print(prediction)
         # [1]
         # Write the name of recognized face
-        cv2.putText(frame, '%s - %.0f' % (names[prediction[0]],prediction[1]),(x-10, y-10), cv2.FONT_HERSHEY_PLAIN,1,(0, 255, 0))
+        #cv2.putText(frame, '%s - %.0f' % (names[prediction[0]],prediction[1]),(x-10, y-10), cv2.FONT_HERSHEY_PLAIN,1,(0, 255, 0))
+        print("Facial recog output: %s - accuracy %f, normalized %f", names[prediction[0]] , prediction[1], (100 - prediction[1]))
         #push to a rabbitmq/
         #set of actions of agent -> 
+
 
 if __name__ == '__main__':
 	trainFaceRec()

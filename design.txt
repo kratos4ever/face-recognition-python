@@ -1,6 +1,19 @@
 1. Invoke the face_recognition command from python with a batch mode? with accuracy estimates as well. 
 The accuracy setting - How to normalize it. Smaller the number - closer the match?
 
+===WORK STEPS====
+1. Write test program to call dlib face_recognition to load images from disk and id the unkown images - DONE
+2. enhance the program to connect to the train_img table and download the images - according to the folder 
+structure below, run the encoding/face detection and see if the image is fine. then delete it
+3. write another program to connect to the stream_img table - download the images by lan_id, place them 
+in the folder structure, run the facial id - update the results to db
+4. Run the above program as a scheduled batch for docker.
+5. Build the docker container.
+6. If docker fails, somehow get this working as a desktop softwre in 027 and get it running
+
+
+
+==== PROGRAM DESIGN ====
 
 face_recognition needs a proper well illuminated high quality benchmark image - This is obtained from the train_img table and downloaded on the 
 first attempt - into a folder with the lan_id as the user's lanid. 

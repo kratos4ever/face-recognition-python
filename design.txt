@@ -3,7 +3,23 @@ The accuracy setting - How to normalize it. Smaller the number - closer the matc
 
 
 face_recognition needs a proper well illuminated high quality benchmark image - This is obtained from the train_img table and downloaded on the 
-first attempt - into a folder
+first attempt - into a folder with the lan_id as the user's lanid. 
+Folder structure
+Data/
+		.
+		.
+		.
+		. . ./LANID/.
+					.
+					.
+					. . ./BENCHMARK/First file from train_img - to be downloaded everytime from train_img - for data safety.
+					.
+					.
+					. . ./TRAINING/subsequent files from train_img -> to be used for OpenCV, also should include false positives from stream_img flagged by supervisors - from the stream_img table - to be deleted as soon as the openCV retraining is done. WORK ON THIS ONCE DLIB is done
+					.
+					.
+					. . ./STREAMING/temp folder for downloading the streaming images - images to be deleted as soon as the facial id work is done
+
 
 
 21. Write a python batch job, that can read the stream_img and train_img tables and get all the stream_img records that are unprocessed, grouped by lan_id.

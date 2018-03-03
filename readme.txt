@@ -12,4 +12,5 @@ Repo that contains code with face recognition, pipelining etc for webcam
 
 =======
 
-To run batch-main.py ./temp/agent_03022018_113638_992241.jpg
+To run batch-main.py ->>
+python batch-main.py ./temp/agent_03022018_113638_992241.jpg

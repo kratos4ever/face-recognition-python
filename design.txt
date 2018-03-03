@@ -1,0 +1,10 @@
+1. Invoke the face_recognition command from python with a batch mode? with accuracy estimates as well. 
+The accuracy setting - How to normalize it. Smaller the number - closer the match?
+
+
+face_recognition needs a proper well illuminated high quality benchmark image - This is obtained from the train_img table and downloaded on the 
+first attempt - into a folder
+
+
+21. Write a python batch job, that can read the stream_img and train_img tables and get all the stream_img records that are unprocessed, grouped by lan_id.
+Then for each lan_id, get to the folder of the lan_id that contains the benchmark image. If it doesn't exist, then 

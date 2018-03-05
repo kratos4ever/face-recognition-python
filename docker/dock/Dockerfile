@@ -24,9 +24,7 @@ RUN apt-get install -y --fix-missing \
     python3-numpy \
     software-properties-common \
     zip \
-    mysql-connector \
-    pathlib \
-    MySQL-python \
+    python-mysqldb \
     && apt-get clean && rm -rf /tmp/* /var/tmp/*
 
 RUN cd ~ && \
@@ -52,5 +50,9 @@ RUN cd /root/face_recognition && \
 #CMD cd /root/face_recognition/examples && \
 #    python3 recognize_faces_in_pictures.py
 
-#run cmd to query the mysql db  
+#run cmd to query the mysql db 
+COPY ./batch-process.py ./root/biometric-sense
+RUN CD /root/biometric-sense
+
+CMD python batch-process.py
 

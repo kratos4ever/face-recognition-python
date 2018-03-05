@@ -12,6 +12,12 @@ in the folder structure, run the facial id - update the results to db
 6. If docker fails, somehow get this working as a desktop softwre in 027 and get it running
 
 
+Docker commands
+cd ./docker/dock
+docker build -t biometric-sense/bio1 --rm=true -f ./Dockerfile . 
+docker images -all
+docker run --name bio_ONE biometric-sense/bio1:latest 
+
 
 ==== PROGRAM DESIGN ====
 

@@ -14,11 +14,14 @@ def initDbConnection():
 	global cur
 	cur = db.cursor()
 
-def updateStatusAndResult(recList,pending):
-	sql = " update stream_img set status = ?, result = ?,num_faces = ?, processed_time = now() where id = ? "
+def updateStatusAndResult(recList):
+	sql = " update stream_img set status = %s, result = %s,num_faces = %s, processed_time = now() where id = %s "
 	for data in recList:		
-		cur.execute(sql,[data.status,data.result,data.num_faces,data.id])
+		cur.execute(sql,(data.status,data.result,data.num_faces,data.id))
 
+	db.commit()
+	cur.close()
+	db.close()
 
 
 ### GETS THE UNPROCESSED RECORDS FROM STREAM_IMG TABLE
@@ -152,11 +155,11 @@ def runImageProcessingForLanId(lanid, recList, trainData):
 					rec.result = "UNKNOWN_MULTIPLE_FACES"
 
 			rec.status = "Y"
-			rec.printAll()
+			rec.printData()
 
 		except: #catch all exception for this record
-			print("error while encoding the training/benchmark image for lanid:",lanid)
-			rec.result = "ERROR_PROCESSING_TRAIN_IMG"
+			print("error while encoding the streaming image for lanid:",lanid , ", id:",rec.id)
+			rec.result = "ERROR_PROCESSING_IMG"
 			rec.status = "F"
 
 ### main function
@@ -199,7 +202,7 @@ def main():
 				setStatusAndResultForAllRecs(recList,"NO_TRAINING_IMAGE","N")
 
 			#processing done for the lan id, update the status- set pending flag to false
-			updateStatusAndResult(recList,False)
+			updateStatusAndResult(recList)
 	
 	except Error as e:
 		print("Error while processing images:",e)

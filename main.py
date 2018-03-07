@@ -9,7 +9,7 @@ def main():
 	while True:
 		print(">>",i)
 		time.sleep(60)
-		i = i1
+		i = i+1
 
 
 if __name__ == '__main__':

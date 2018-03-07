@@ -56,7 +56,7 @@ def getUnProcessedStreamImages():
 
 		print(faceStrmLanIdSet)
 		print(faceStrmMap)
-	cur.close()
+	#cur.close()
 	return
 
 def setStatusAndResultForAllRecs(recList,result,status):

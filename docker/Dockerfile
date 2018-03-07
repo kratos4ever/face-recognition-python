@@ -22,9 +22,10 @@ RUN apt-get install -y --fix-missing \
     pkg-config \
     python3-dev \
     python3-numpy \
+    libmysqlclient-dev \
     software-properties-common \
     zip \
-    python-mysqldb \
+    python-mysqldb \    
     && apt-get clean && rm -rf /tmp/* /var/tmp/*
 
 RUN cd ~ && \
@@ -42,17 +43,18 @@ RUN cd ~ && \
 #     pip3 install -r requirements.txt
 # RUN whatever_command_you_run_to_start_your_app
 
-COPY . /root/face_recognition
+COPY ./face_recognition/ /root/face_recognition
 RUN cd /root/face_recognition && \
     pip3 install -r requirements.txt && \
     python3 setup.py install
 
-#CMD cd /root/face_recognition/examples && \
-#    python3 recognize_faces_in_pictures.py
+CMD cd /root/face_recognition/examples && \
+    python3 recognize_faces_in_pictures.py
 
 #run cmd to query the mysql db 
-COPY ./batch-process.py ./root/biometric-sense
-RUN CD /root/biometric-sense
+COPY ./face-recognition-python/ /biometric-sense
+WORKDIR /biometric-sense
+RUN chmod +x /biometric-sense/run.sh
 
-CMD python batch-process.py
-
+ENTRYPOINT ["/biometric-sense/run.sh"]
+CMD echo "running the job"

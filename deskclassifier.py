@@ -35,7 +35,7 @@ def load_graph(model_file):
 
   return graph
 
-model_file = "./agent_desk_v2_graph.pb"
+model_file = "./agent_desk_v4_graph.pb"
 label_file = "./agent_desk_v1_labels.txt"
 graph = load_graph(model_file)
  

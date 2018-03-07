@@ -1,0 +1,137 @@
+1. Invoke the face_recognition command from python with a batch mode? with accuracy estimates as well. 
+The accuracy setting - How to normalize it. Smaller the number - closer the match?
+
+===WORK STEPS====
+1. Write test program to call dlib face_recognition to load images from disk and id the unkown images - DONE
+2. enhance the program to connect to the train_img table and download the images - according to the folder 
+structure below, run the encoding/face detection and see if the image is fine. then delete it
+3. write another program to connect to the stream_img table - download the images by lan_id, place them 
+in the folder structure, run the facial id - update the results to db
+4. Run the above program as a scheduled batch for docker.
+5. Build the docker container.
+6. If docker fails, somehow get this working as a desktop softwre in 027 and get it running
+
+
+Docker commands
+cd ./docker/dock
+docker build -t biometric-sense/bio1 --rm=true -f ./Dockerfile . 
+docker images -all
+docker run --name bio_ONE biometric-sense/bio1:latest 
+
+
+==== PROGRAM DESIGN ====
+
+face_recognition needs a proper well illuminated high quality benchmark image - This is obtained from the train_img table and downloaded on the 
+first attempt - into a folder with the lan_id as the user's lanid. 
+Folder structure
+Data/
+		.
+		.
+		.
+		. . ./LANID/.
+					.
+					.
+					. . ./BENCHMARK/First file from train_img - to be downloaded everytime from train_img - for data safety.
+					.
+					.
+					. . ./TRAINING/subsequent files from train_img -> to be used for OpenCV, also should include false positives from stream_img flagged by supervisors - from the stream_img table - to be deleted as soon as the openCV retraining is done. WORK ON THIS ONCE DLIB is done
+					.
+					.
+					. . ./STREAMING/temp folder for downloading the streaming images - images to be deleted as soon as the facial id work is done
+
+
+
+21. Write a python batch job, that can read the stream_img and train_img tables and get all the stream_img records that are unprocessed, grouped by lan_id.
+Then for each lan_id, get to the folder of the lan_id that contains the benchmark image. If it doesn't exist, then - Set the status of the stream_img as 
+training image doesn't exist
+
+
+STEP 1: Query to select the pending images from stream_img table:
+select lan_id,date_format(capture_time,'%m%d%Y_%H%i%S'),image,id  from stream_img where status = 'N' order by lan_id,id
+Put the results in a map<lan_id,list<id,image,capture_time,lan_id>>
+
+
+
+STEP 2: Query to select the benchmark image (from train_img table:)
+---
+select a.lan_id,a.id,a.capture_time,a.image,a.processed_time,a.status,a.result from train_img a, 
+(select lan_id, max(id) as id from train_img where lan_id in ('NA\\nvep5898','na\\rgupta') 
+and status = 'Y' 
+group by lan_id) b
+where a.id = b.id
+---
+ The above query gets the latest img for a given set of lan_ids (that are from the stream_img table), that are set to status -> Y. As we are doing a max(id)
+ we will get only one image per lan_id.
+ Put the results in map <lan_id,<image,lan_id,capture_time,processed_time,status,result,id)
+
+STEP 3: Put these query rqu
+ Save that training image to folder with name as data\lan_id\lan_id\id.jpg
+ Save the stream images for the lan_id to data\lan_id\unknown\id.jpg
+
+ Run the face_recognition for both folders 
+ face_recognition(data\lan_id\lan_id, data\lan_id\unknown)
+
+ STEP 4: Based on the results for each id.jpg (from the unkown folder) -> run an update SQL with the query :
+ Update stream_img set status='Y', result = 'SUCCESS', PROCESSED_TIME = now() where id = ?
+
+
+ ===============
+ OBJECTS: for stream_img
+ FaceStreamImgData
+ 	String lanid
+ 	long id
+ 	date capture_time
+ 	String status
+ 	byte[] image
+ 	string result
+ 	double accuracy
+
+FaceTrainImgData
+	String lanid
+	long id
+	date capture_time
+	String status
+	byte[] image 	
+
+
+
+Accuracy -> TBD
+0.5 to 0.6 -> 90%
+0.4 to 0.5 -> 93%
+0.3 to 0.4 -> 95%
+0.2 to 0.3 -> 97%
+0.1 to 0.2 -> 99%
+0 to 0.1 -> 100%
+
+
+ if 
+ 0.6 = 90% accurate
+ 0.0 = 100% accurate
+ 1 = 0% accurate
+0.6	0.9
+0.0001	1
+1	0.0000001
+ klog(x) = accuracy
+ klog(0.6) = 0.9
+ klog(0.00001) = 1
+
+ y = -0.006* ln(x) + 0.42
+
+======
+Possible statuses for stream_img
+
+NO_FACES_FOUND
+UNKNOWN_PERSON
+SUCCESS_MULTIPLE_FACES
+UNKNOWN_MULTIPLE_FACES
+SUCCESS
+NO_TRAINING_IMAGE
+
+More statuses needed for 
+MOTION_DETECTION -> possible by a job that runs every 10 mins, inspects the images during the past 10 mins for each agent, tries to deduce motion etc.
+IMPERSONATION (USING PRINTED PHOTO/CELL PHONE) -> Same solution as above, but needs to run more frequently. 
+
+This can also be done by getting the last set of 3 images from stream_img for a given agent (that are successfully processed, get the location of the facial 
+features in each image and see if they are the same, then send an alert.) -To be done as a separate cron job, as it won't be run every 10 seconds.
+=================
+

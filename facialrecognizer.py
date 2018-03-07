@@ -110,9 +110,7 @@ def runFaceRecognition(frame,model):
         #print(prediction)
         # [1]
         # Write the name of recognized face
-        cv2.putText(frame,
-           '%s - %.0f' % (names[prediction[0]],prediction[1]),
-           (x-10, y-10), cv2.FONT_HERSHEY_PLAIN,1,(0, 255, 0))
+        cv2.putText(frame, '%s - %.0f' % (names[prediction[0]],prediction[1]),(x-10, y-10), cv2.FONT_HERSHEY_PLAIN,1,(0, 255, 0))
         #push to a rabbitmq/
         #set of actions of agent -> 
 

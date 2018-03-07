@@ -2,4 +2,4 @@
 
 echo "Running the batch process"
 
-python3 batch-process.py
+python3 main.py

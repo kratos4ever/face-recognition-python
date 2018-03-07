@@ -166,6 +166,9 @@ def runImageProcessingForLanId(lanid, recList, trainData):
 			print("error while encoding the streaming image for lanid:",lanid , ", id:",rec.id)
 			rec.result = "ERROR_PROCESSING_IMG"
 			rec.status = "F"
+		
+		#delete the image as the processing is done
+		
 
 ### main function
 def main():

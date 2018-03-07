@@ -146,3 +146,52 @@ Y - processed successfully
 F - failed during processing
 P - pending processing
 
+
+********************
+Possible opensource dashboards
+metabase 
+sudo docker run -d -p 3000:3000 --name metabase metabase/metabase
+
+id/pw : email, db password
+http://orlawv027:3000/
+Some queries -> 
+
+select id, lan_id, capture_time, processed_time, result, num_faces from stream_img where status <> 'N' and result <> 'SUCCESS' order by id desc
+
+--QUERY for summary by hour - all LanIds
+select lan_id,result,date_format(capture_time,'%Y-%m-%d - %H%p') as capture, count(*) from stream_img group by lan_id, result,capture
+order by capture desc
+
+--Query for summary by hour - single lanid
+select lan_id,result,date_format(capture_time,'%Y-%m-%d - %H%p') as capture, count(*) from stream_img
+where lan_id = 'NA\\nvep5898' group by lan_id, result,capture
+order by capture desc
+
+select lan_id,result,date_format(capture_time,'%Y-%m-%d - %H%p') as capture, count(*) from stream_img
+where lan_id = {{lan_id}} group by lan_id, result,capture
+order by capture desc
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

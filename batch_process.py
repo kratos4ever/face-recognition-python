@@ -16,6 +16,7 @@ def initDbConnection():
 
 def updateStatusAndResult(recList):
 	sql = " update stream_img set status = %s, result = %s,num_faces = %s, processed_time = now() where id = %s "
+	cur = db.cursor()
 	for data in recList:		
 		cur.execute(sql,(data.status,data.result,data.num_faces,data.id))
 
@@ -56,6 +57,7 @@ def getUnProcessedStreamImages():
 
 		print(faceStrmLanIdSet)
 		print(faceStrmMap)
+	cur.close()
 	return
 
 def setStatusAndResultForAllRecs(recList,result,status):
@@ -72,6 +74,7 @@ def loadTrainingImages():
 
 	sql = " select a.lan_id,a.id,date_format(a.capture_time,'%m%d%Y_%H%i%S') as time,a.image from train_img a, (select lan_id, max(id) as id from train_img where lan_id in ("+lanIdClause+") group by lan_id) b where a.id = b.id "
 
+	cur = db.cursor()
 	print(sql)
 	nrows = cur.execute(sql)
 	print(nrows)
@@ -87,6 +90,7 @@ def loadTrainingImages():
 			faceTrainMap[lanid] = trainData #There will be only one training data per image. For any other pipeline, change this to a list?
 
 		print(faceTrainMap)
+	cur.close()
 
 
 ### RUN THE image processing pipelien for facial recognition

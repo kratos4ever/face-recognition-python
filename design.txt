@@ -14,9 +14,9 @@ in the folder structure, run the facial id - update the results to db
 
 Docker commands
 cd ./docker/dock
-docker build -t biometric-sense/bio1 --rm=true -f ./Dockerfile . 
+sudo docker build -t biometric-sense/bio1 --rm=true -f ./Dockerfile . 
 docker images -all
-docker run --name bio_ONE biometric-sense/bio1:latest 
+sudo docker run --name bio_ONE biometric-sense/bio1:latest 
 
 
 ==== PROGRAM DESIGN ====

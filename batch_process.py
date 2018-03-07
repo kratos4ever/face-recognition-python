@@ -10,7 +10,7 @@ import face_recognition
 ### INITIALIZES THE DB CONNECTION TO MYSQL
 def initDbConnection():
 	global db
-	db = MySQLdb.connect(host="localhost",user="biometric-user",passwd="B10M37R1K5",db="biometrics")
+	db = MySQLdb.connect(host="orlawv027",user="biometric-user",passwd="B10M37R1K5",db="biometrics")
 	global cur
 	cur = db.cursor()
 
@@ -22,7 +22,6 @@ def updateStatusAndResult(recList):
 
 	db.commit()
 	cur.close()
-	db.close()
 
 
 ### GETS THE UNPROCESSED RECORDS FROM STREAM_IMG TABLE
@@ -138,18 +137,20 @@ def runImageProcessingForLanId(lanid, recList, trainData):
 		try:
 			testImg = face_recognition.load_image_file(strmImgPath)
 			testEnc = face_recognition.face_encodings(testImg)
-			testResults = face_recognition.face_distance(benchEnc,testEnc)
+			
 
 			if(len(testEnc) == 0):
 				rec.result = "NO_FACES_FOUND"
 				rec.num_faces = 0
 			elif(len(testEnc) == 1):
 				rec.num_faces = 1
+				testResults = face_recognition.face_distance(benchEnc,testEnc)
 				if(testResults[0] <0.6):
 					rec.result = "SUCCESS"
 				else:
 					rec.result = "UNKNOWN_PERSON"
 			elif(len(testEnc) > 1):
+				testResults = face_recognition.face_distance(benchEnc,testEnc)
 				rec.num_faces = len(testEnc)
 				for rs in testResults:
 					if(rs < 0.6):

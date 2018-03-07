@@ -9,9 +9,10 @@ class FaceStreamData:
 		self.status = status
 		self.result = "PROCESSING"
 		self.accuracy = 0.0
+		self.num_faces = 0
 
 	def printData(self):
-		print("Lan_ID:",self.lanid,", capture_time:",self.capture_time,",status:",self.status,",result:",self.result)
+		print("Lan_ID:",self.lanid,", capture_time:",self.capture_time,",status:",self.status,",result:",self.result, ", num_faces:",self.num_faces)
 
 
 

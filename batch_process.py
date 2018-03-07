@@ -3,10 +3,9 @@ import sys,os
 import time
 import datetime
 import MySQLdb
-import smtplib
 from face_data_classes import FaceStreamData
 from face_data_classes import FaceTrainData
-import batch_face_id 
+import face_recognition 
 
 ### INITIALIZES THE DB CONNECTION TO MYSQL
 def initDbConnection():
@@ -14,6 +13,12 @@ def initDbConnection():
 	db = MySQLdb.connect(host="localhost",user="biometric-user",passwd="B10M37R1K5",db="biometrics")
 	global cur
 	cur = db.cursor()
+
+def updateStatusAndResult(recList,pending):
+	sql = " update stream_img set status = ?, result = ?,num_faces = ?, processed_time = now() where id = ? "
+	for data in recList:		
+		cur.execute(sql,[data.status,data.result,data.num_faces,data.id])
+
 
 
 ### GETS THE UNPROCESSED RECORDS FROM STREAM_IMG TABLE
@@ -50,6 +55,11 @@ def getUnProcessedStreamImages():
 		print(faceStrmMap)
 	return
 
+def setStatusAndResultForAllRecs(recList,result,status):
+	for data in recList:
+		data.result = result
+		data.status = status
+	return
 
 ### gets a single training image per lanid (from the un processed records in the stream_img table) from the train_img table
 def loadTrainingImages():
@@ -76,14 +86,15 @@ def loadTrainingImages():
 		print(faceTrainMap)
 
 
+### RUN THE image processing pipelien for facial recognition
 def runImageProcessingForLanId(lanid, recList, trainData):
 	#delete the existing directory?
 	#create a directory with lanid name in the data directory
-	lanidDir = "./"+lanid
+	lanidDir = "./data/"+lanid
 	trainDir = "benchmark"
 	streamDir = "unknown"
-	if not os.path.exists("./"+lanid):
-		os.makedirs("./"+lanid)
+	if not os.path.exists(lanidDir):
+		os.makedirs(lanidDir)
 
 	if not os.path.exists(os.path.join(lanidDir,trainDir)):
 		os.makedirs(os.path.join(lanidDir,trainDir))
@@ -92,19 +103,63 @@ def runImageProcessingForLanId(lanid, recList, trainData):
 		os.makedirs(os.path.join(lanidDir,streamDir))
 
 	#Create all the files
-	trainImg = open(os.path.join(lanidDir,trainDir,lanid+".jpg"),"wb")
+	trainImgPath = os.path.join(lanidDir,trainDir,lanid+".jpg")
+	trainImg = open(trainImgPath,"wb")
 	trainImg.write(trainData.image)
 	trainImg.close()
 
+	#just try to do the check on the fly after the folder check
+	######## DO A MULTIPLE FACE CHECK - in the training batch process, which is what it should do??
+	try:
+		benchImg = face_recognition.load_image_file(trainImgPath)
+		benchEnc = face_recognition.face_encodings(benchImg)[0] ## HANDLE MULTIPLE FACES IN TRAINING IMG - ERROR OUT FOR THE LANID. ALSO HANDLE NO FACES ETC
+	except: #Have to catch all - get out
+		print("error while encoding the training/benchmark image for lanid:",lanid)
+		setResultForAllRecs(recList,"ERROR_PROCESSING_TRAIN_IMG","N")
+
+
+	#### START PROCESSING RECORDS FOR THIS EMP
 	for rec in recList:
-		strmImg = open(os.path.join(lanidDir,streamDir,rec.id+".jpg"),"wb")
+		strmImgPath = os.path.join(lanidDir,streamDir,str(rec.id)+".jpg")
+		strmImg = open(strmImgPath,"wb")
 		strmImg.write(rec.image)
 		strmImg.close()
 
-		#call face
+		print("\n\n==========\nPROCESSING IMAGE: ",strmImgPath)
 
+		#call face recognition for this image - this can be done as parallel for?
+		try:
+			testImg = face_recognition.load_image_file(strmImgPath)
+			testEnc = face_recognition.face_encodings(testImg)
+			testResults = face_recognition.face_distance(benchEnc,testEnc)
 
+			if(len(testEnc) == 0):
+				rec.result = "NO_FACES_FOUND"
+				rec.num_faces = 0
+			elif(len(testEnc) == 1):
+				rec.num_faces = 1
+				if(testResults[0] <0.6):
+					rec.result = "SUCCESS"
+				else:
+					rec.result = "UNKNOWN_PERSON"
+			elif(len(testEnc) > 1):
+				rec.num_faces = len(testEnc)
+				for rs in testResults:
+					if(rs < 0.6):
+						rec.result = "SUCCESS_MULTIPLE_FACES"
+						break;
+				if(rec.result != "SUCCESS_MULTIPLE_FACES"):
+					rec.result = "UNKNOWN_MULTIPLE_FACES"
 
+			rec.status = "Y"
+			rec.printAll()
+
+		except: #catch all exception for this record
+			print("error while encoding the training/benchmark image for lanid:",lanid)
+			rec.result = "ERROR_PROCESSING_TRAIN_IMG"
+			rec.status = "F"
+
+### main function
 def main():
 	print("Starting the batch-process iteration:")
 	
@@ -130,18 +185,21 @@ def main():
 		print("=========\ntrying to load training data\n==============")
 		loadTrainingImages()
 
+		print("=========\nProcessing Images\n==============")
 		#for each lanid in the stream_img result list, check if there is a training image, if there is, do the facial recog for each record 
 		for lanid in faceStrmLanIdSet:
+			recList = faceStrmMap[lanid]
+
 			if(lanid in faceTrainMap):
 				trainData = faceTrainMap[lanid]
 				#save the training and streaming images for processing.
-
+				runImageProcessingForLanId(lanid,faceStrmMap[lanid],trainData)
 			else:
 				#set the status for all the ids in the list for the lanid from faceStrmMap as "NO_TRAINING_IMAGE"
-				recList = faceStrmMap[lanid]
-				for data in recList:
-					data.result = "NO_TRAINING_IMAGE"
-					data.status = "N"
+				setStatusAndResultForAllRecs(recList,"NO_TRAINING_IMAGE","N")
+
+			#processing done for the lan id, update the status- set pending flag to false
+			updateStatusAndResult(recList,False)
 	
 	except Error as e:
 		print("Error while processing images:",e)

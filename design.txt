@@ -172,26 +172,32 @@ where lan_id = {{lan_id}} group by lan_id, result,capture
 order by capture desc
 
 
+==============================================
 
+FOR RabbitMQ consumer design:
 
+1. Docker container invokes the python program which invokes 5 consumers (? how to make this configurable) -> as of now start with just one consumer? can rabbitmq 
+library pika make it as self managed threading for the number of consumers configured??
 
+2. each consumer thread -> will connect to the channel and listen on the facestreaming and facetraining queues.
+-> the facetraining queue, will as of now -> run the dnn face detector, sees if there is only one face, and okays the result. What to do in case of more training data? Do the 
+same check, the streaming will use the most latest image? -> may be having a TL approve an image for training is better??
 
+3. Consumer - gets the id from the queue as the message, as of now lets not do the redis cache for other pipeline items. -> But this needs to be done as soon as the full solution is done
+get the data for that id, create folders as 
+empid (create if not exists)
+     ....benchmark (create if not exists)
+	             ....... benchmark image (delete this or create it?) - might cause problems?
 
+Alternatively -> 
+imageid
+       ......benchmark()
+	   .........unknown()
+Once done, delete all the folders -> this will ensure that even if the imageids are reused by the database -> there will be no conflict and we need to delete images anyway
 
+--AFter the image recog call -> just insert the result in the results table.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+----------------
+Once this flow is done, then lets implement redis + the openCV pipeline as well and find other pipelines
+	   
+====================

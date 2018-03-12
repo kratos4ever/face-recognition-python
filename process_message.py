@@ -5,6 +5,7 @@ import datetime
 import MySQLdb
 from face_data_classes import FaceStreamData
 from face_data_classes import FaceTrainData
+import face_recognition
 
 ### INITIALIZES THE DB CONNECTION TO MYSQL
 def initDbConnection():

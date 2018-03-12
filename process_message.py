@@ -92,8 +92,8 @@ def runImageProcessing(data, trainData):
 	try:
 		benchImg = face_recognition.load_image_file(trainImgPath)
 		benchEnc = face_recognition.face_encodings(benchImg)[0] ## HANDLE MULTIPLE FACES IN TRAINING IMG - ERROR OUT FOR THE LANID. ALSO HANDLE NO FACES ETC
-	except: #Have to catch all - get out
-		print("error while encoding the training/benchmark image for lanid:",data.lanid)
+	except Exception as e: #Have to catch all - get out
+		print("error while encoding the training/benchmark image for empid:",data.lanid , ". Error:",str(e))
 		data.result = "ERROR_PROCESSING_TRAIN_IMG"
 		data.status = "N"
 		return
@@ -136,8 +136,8 @@ def runImageProcessing(data, trainData):
 		data.status = "Y"
 		data.printData()
 
-	except: #catch all exception for this record
-		print("error while encoding the streaming image for empid:",data.lanid , ", imagebagid:",data.id)
+	except Exception as e: #catch all exception for this record
+		print("error while encoding the streaming image for empid:",data.lanid , ", imagebagid:",data.id , ". Error:",str(e))
 		data.result = "ERROR_PROCESSING_IMG"
 		data.status = "F"
 		return
@@ -180,8 +180,8 @@ def process(id):
 
 		updateStatusAndResult(streamData)
 
-	except Error as e:
-		print("Error while processing images:",e)
+	except Exception as e:
+		print("Error while processing message:", id, +". Error:",str(e))
 	
 
 	

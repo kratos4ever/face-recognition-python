@@ -16,7 +16,7 @@ Docker commands
 cd bio-code/
 sudo docker build -t biometric-sense/bio1 --rm=true -f ./Dockerfile . 
 docker images -all
-sudo docker run --name bio_ONE biometric-sense/bio1:latest 
+sudo docker run -d --name bio_ONE biometric-sense/bio1:latest 
 
 
 ==== PROGRAM DESIGN ====

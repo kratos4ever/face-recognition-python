@@ -2,4 +2,4 @@
 
 echo "Running the batch process"
 
-python3 consumer.py
+python3 -u consumer.py

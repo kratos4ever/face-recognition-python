@@ -26,4 +26,4 @@ class FaceTrainData:
 
 
 	def printData(self):
-		print("Lan_ID:",self.lanid,",status:",self.status)
+		print("Lan_ID:",self.lanid)

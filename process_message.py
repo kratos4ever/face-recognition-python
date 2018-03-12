@@ -25,17 +25,17 @@ def updateStatusAndResult(data):
 ### GETS THE UNPROCESSED RECORDS FROM STREAM_IMG TABLE
 def getUnProcessedStreamImages(id):
 
-	sql = " select employeeid, imagefile, date_format(createdon,'%m%d%Y_%H%i%S') as time from imagebag where imagebagid = %s "
+	sql = " select employeeid, imagefile, date_format(createdon,'%m%d%Y_%H%i%S') as time from imagebag where imagebagid = " + id
 	print("SQL:" ,sql)
 	
-	nrows = cur.execute(sql,(id))
+	nrows = cur.execute(sql)
 	streamData = None
 	if(nrows > 0):
 		resultset = cur.fetchall()
 		for data in resultset:
 			empid = data[0]
-			capture_time = data[1]
-			image = data[2]
+			image = data[1]
+			capture_time = data[2]
 			status = "N"
 			streamData = FaceStreamData(empid,id,capture_time,image,status)
 
@@ -46,11 +46,11 @@ def getUnProcessedStreamImages(id):
 ### gets a single training image per lanid (from the un processed records in the stream_img table) from the train_img table
 def loadTrainingImages(empid):
 
-	sql = " select b.imagebagid, b.imagefile, date_format(b.createdon,'%m%d%Y_%H%i%S') as time from imagebag b, (select max(imagebagid) as id from imagebag a where a.employeeid = %s and imagesourceid = '2') a where a.id = b.imagebagid  "
+	sql = " select b.imagebagid, b.imagefile, date_format(b.createdon,'%m%d%Y_%H%i%S') as time from imagebag b, (select max(imagebagid) as id from imagebag a where a.employeeid = '"+empid+"' and imagesourceid = '2') a where a.id = b.imagebagid  "
 	trainData = None
 	cur = db.cursor()
 	print(sql)
-	nrows = cur.execute(sql,(empid))
+	nrows = cur.execute(sql)
 	if(nrows > 0):
 		resultset = cur.fetchall()
 		for data in resultset:
@@ -61,7 +61,7 @@ def loadTrainingImages(empid):
 			trainData = FaceTrainData(empid,id,capture_time,image)
 
 	cur.close()
-	trainData.printData()
+	
 	return trainData
 
 
@@ -82,7 +82,7 @@ def runImageProcessing(data, trainData):
 		os.makedirs(os.path.join(lanidDir,streamDir))
 
 	#Create all the files
-	trainImgPath = os.path.join(lanidDir,trainDir,lanid+".jpg")
+	trainImgPath = os.path.join(lanidDir,trainDir,data.lanid+".jpg")
 	trainImg = open(trainImgPath,"wb")
 	trainImg.write(trainData.image)
 	trainImg.close()
@@ -93,9 +93,10 @@ def runImageProcessing(data, trainData):
 		benchImg = face_recognition.load_image_file(trainImgPath)
 		benchEnc = face_recognition.face_encodings(benchImg)[0] ## HANDLE MULTIPLE FACES IN TRAINING IMG - ERROR OUT FOR THE LANID. ALSO HANDLE NO FACES ETC
 	except: #Have to catch all - get out
-		print("error while encoding the training/benchmark image for lanid:",lanid)
+		print("error while encoding the training/benchmark image for lanid:",data.lanid)
 		data.result = "ERROR_PROCESSING_TRAIN_IMG"
 		data.status = "N"
+		return
 
 
 	#### START PROCESSING RECORDS FOR THIS EMP
@@ -139,7 +140,7 @@ def runImageProcessing(data, trainData):
 		print("error while encoding the streaming image for empid:",data.lanid , ", imagebagid:",data.id)
 		data.result = "ERROR_PROCESSING_IMG"
 		data.status = "F"
-		
+		return
 		#delete the image as the processing is done
 		
 
@@ -167,8 +168,8 @@ def process(id):
 
 		#Get a list of unique lanids from the above query and get the training image for each. set in a map<lanid,<object:lanid,id,image>>
 		empid = streamData.lanid
-		print("=========\ntrying to load training data for employeeid : " + +"\n==============")
-		trainData = loadTrainingImages(employeeid)
+		print("=========\ntrying to load training data for employeeid : " + empid +"\n==============")
+		trainData = loadTrainingImages(empid)
 		
 		if(trainData is None):
 			#set the status for all the ids in the list for the lanid from faceStrmMap as "NO_TRAINING_IMAGE"

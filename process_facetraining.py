@@ -24,7 +24,7 @@ def updateStatusAndResult(data):
 
 
 ### GETS THE UNPROCESSED RECORDS FROM STREAM_IMG TABLE
-def getUnProcessedStreamImages(id):
+def getUnProcessedTrainingImage(id):
 
 	sql = " select employeeid, imagefile, date_format(createdon,'%m%d%Y_%H%i%S') as time from imagebag where imagebagid = " + id
 	print("SQL:" ,sql)
@@ -82,23 +82,6 @@ def runImageProcessing(data, trainData):
 	if not os.path.exists(os.path.join(lanidDir,streamDir)):
 		os.makedirs(os.path.join(lanidDir,streamDir))
 
-	#Create all the files
-	trainImgPath = os.path.join(lanidDir,trainDir,data.lanid+".jpg")
-	trainImg = open(trainImgPath,"wb")
-	trainImg.write(trainData.image)
-	trainImg.close()
-
-	#just try to do the check on the fly after the folder check
-	######## DO A MULTIPLE FACE CHECK - in the training batch process, which is what it should do??
-	try:
-		benchImg = face_recognition.load_image_file(trainImgPath)
-		benchEnc = face_recognition.face_encodings(benchImg)[0] ## HANDLE MULTIPLE FACES IN TRAINING IMG - ERROR OUT FOR THE LANID. ALSO HANDLE NO FACES ETC
-	except Exception as e: #Have to catch all - get out
-		print("error while encoding the training/benchmark image for empid:",data.lanid , ". Error:",str(e))
-		data.result = "ERROR_PROCESSING_TRAIN_IMG"
-		data.status = "N"
-		return
-
 
 	#### START PROCESSING RECORDS FOR THIS EMP
 	strmImgPath = os.path.join(lanidDir,streamDir,str(data.id)+".jpg")
@@ -115,30 +98,45 @@ def runImageProcessing(data, trainData):
 		
 
 		if(len(testEnc) == 0):
-			data.result = "NO_FACES_FOUND"
+			data.result = "FAIL_NO_FACES_FOUND"
+			data.status = "F"
 			data.num_faces = 0
 		elif(len(testEnc) == 1):
 			data.num_faces = 1
-			testResults = face_recognition.face_distance(benchEnc,testEnc)
-			if(testResults[0] <0.6):
-				data.result = "SUCCESS"
-			else:
-				data.result = "UNKNOWN_PERSON"
+			data.result = "SUCCESS"
+			data.status = "Y"
+			
+			if trainData is None:
+				#As there is no previous training image - treat it as a success if there is only one face 
+			elif:
+				#Create all the files
+				trainImgPath = os.path.join(lanidDir,trainDir,data.lanid+".jpg")
+				trainImg = open(trainImgPath,"wb")
+				trainImg.write(trainData.image)
+				trainImg.close()
+
+				#just try to do the check on the fly after the folder check
+				######## DO A MULTIPLE FACE CHECK - in the training batch process, which is what it should do??
+				try:
+					benchImg = face_recognition.load_image_file(trainImgPath)
+					benchEnc = face_recognition.face_encodings(benchImg)[0] 
+
+					testResults = face_recognition.face_distance(benchEnc,testEnc)
+					if(testResults[0] <0.6):
+						data.result = "SUCCESS_MATCH_PREV_TRAINING"
+				except Exception as e: #Have to catch all - do nothing - if the prev training image is bad, doesn't matter for the new training image
+					print("error while encoding the previous training/benchmark image for empid:",data.lanid , ". Error:",str(e))
+
+
 		elif(len(testEnc) > 1):
-			testResults = face_recognition.face_distance(benchEnc,testEnc)
-			data.num_faces = len(testEnc)
-			for rs in testResults:
-				if(rs < 0.6):
-					data.result = "SUCCESS_MULTIPLE_FACES"
-					break;
-			if(data.result != "SUCCESS_MULTIPLE_FACES"):
-				data.result = "UNKNOWN_MULTIPLE_FACES"
+			data.status = "F"
+			data.result = "FAIL_MULTIPLE_FACES"
 
 		data.status = "Y"
 		data.printData()
 
 	except Exception as e: #catch all exception for this record
-		print("error while encoding the streaming image for empid:",data.lanid , ", imagebagid:",data.id , ". Error:",str(e))
+		print("error while encoding the training image for emp-id:",data.lanid , ", imagebagid:",data.id , ". Error:",str(e))
 		data.result = "ERROR_PROCESSING_IMG"
 		data.status = "F"
 		return
@@ -147,7 +145,7 @@ def runImageProcessing(data, trainData):
 
 ### main function
 def process(id):
-	print("Starting the message processing for id:",id)
+	print("Starting the FaceTraining Message processing for imagebagid:",id)
 	
 	try:
 		#init - connection to the mysql server - no externalizing as of now
@@ -161,7 +159,7 @@ def process(id):
 
 	try:
 		#run the query to get the images from stream_img table, set into map<lanid,list<object:lanid,img,capture_time,id,status,etc>>	
-		streamData = getUnProcessedStreamImages(id)
+		streamData = getUnProcessedTrainingImage(id)
 
 		if(streamData is None):
 			print("No records found for processing, exiting")
@@ -172,12 +170,7 @@ def process(id):
 		print("=========\ntrying to load training data for employeeid : " + empid +"\n==============")
 		trainData = loadTrainingImages(empid)
 		
-		if(trainData is None):
-			#set the status for all the ids in the list for the lanid from faceStrmMap as "NO_TRAINING_IMAGE"
-			streamData.result = "NO_TRAINING_IMAGE"
-			streamData.status = "F"
-		else:
-			runImageProcessing(streamData,trainData)
+		runImageProcessing(streamData,trainData)
 
 		updateStatusAndResult(streamData)
 

@@ -147,7 +147,7 @@ def runImageProcessing(data, trainData):
 
 ### main function
 def process(id):
-	print("Starting the message processing for id:",id)
+	print("Starting the FaceStreaming message processing for imagebag id:",id)
 	
 	try:
 		#init - connection to the mysql server - no externalizing as of now

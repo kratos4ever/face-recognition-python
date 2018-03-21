@@ -10,7 +10,7 @@ class ConsumerThread(threading.Thread):
 	def callback_func(self, channel, method, properties, body):
 		print("{} received '{}'".format(self.name, body.decode()))
 		id = body.decode()
-		process_message.process(id)
+		process_facetraining.process(id)
 
 	def run(self):
 		credentials = pika.PlainCredentials("admin", "p@ssw0rd")

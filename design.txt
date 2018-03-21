@@ -17,7 +17,7 @@ cd bio-code/
 sudo docker build -t biometric-sense/bio1 --rm=true -f ./Dockerfile . 
 docker images -all
 sudo docker run -d -e MODE=FaceStreaming --name bio_fstream biometric-sense/bio1:latest 
-sudo docker run -d -e MODE=FaceTraining --name bio_ftrain biometric-sense/bio1:latest 
+	 
 
 sudo docker logs -f bio_ONE
 
@@ -153,10 +153,12 @@ features in each image and see if they are the same, then send an alert.) -To be
 
 STATUSES
 
-N - not processed
-Y - processed successfully
-F - failed during processing
-P - pending processing
+N - not processed ====DELETE
+
+Y - processed successfully --KEEP
+F - failed during processing --KEEP
+
+P - pending processing (????)
 
 
 ********************

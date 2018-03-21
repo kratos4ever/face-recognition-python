@@ -124,6 +124,8 @@ def runImageProcessing(data, trainData):
 					testResults = face_recognition.face_distance(benchEnc,testEnc)
 					if(testResults[0] <0.6):
 						data.result = "SUCCESS_MATCH_PREV_TRAINING"
+					else:
+						data.result = "SUCCESS_NOMATCH_PREV_TRAINING"
 				except Exception as e: #Have to catch all - do nothing - if the prev training image is bad, doesn't matter for the new training image
 					print("error while encoding the previous training/benchmark image for empid:",data.lanid , ". Error:",str(e))
 

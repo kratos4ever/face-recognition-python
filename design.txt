@@ -21,16 +21,19 @@ sudo docker run -d -e MODE=FaceStreaming --name bio_fstream biometric-sense/bio1
 sudo docker run -d -e MODE=FaceTraining --name bio_ftrain biometric-sense/bio1:latest 
 sudo docker run -e MODE=FaceTraining --name bio_ftrain biometric-sense/bio1:latest 
 
-sudo docker logs -f bio_ONE
+sudo docker logs -f bio_fstream
+sudo docker logs -f bio_ftrain
 
 --Docker commands for rabbitmq
 sudo docker build -t biometric-sense/rabbitmq --rm=true -f ./Dockerfile . 
 sudo docker run -d --name rabbit_ONE biometric-sense/rabbitmq:latest 
-
 sudo docker run -d --hostname orlawv027 --name rabbit_ONE -p 5672:5672 -p 15672:15672 rabbitmq:3-management
 
 Clenaup images
 sudo docker rmi $(sudo docker images --filter "dangling=true" -q --no-trunc)
+
+Stopping and removing containers
+sudo docker rm $(sudo docker stop $(sudo docker ps -a -q --filter name=bio_* --format="{{.ID}}"))
 
 
 ==== PROGRAM DESIGN ====

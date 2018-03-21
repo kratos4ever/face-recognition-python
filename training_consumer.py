@@ -13,7 +13,7 @@ class ConsumerThread(threading.Thread):
 		process_facetraining.process(id)
 
 	def run(self):
-		credentials = pika.PlainCredentials("admin", "p@ssw0rd")
+		credentials = pika.PlainCredentials("guest", "guest")
 		connection = pika.BlockingConnection(pika.ConnectionParameters(host=self._host,credentials=credentials))
 		channel = connection.channel()
 		channel.queue_declare(queue='FaceTraining',durable='True')
@@ -23,6 +23,6 @@ class ConsumerThread(threading.Thread):
 
 		
 if __name__ == "__main__":
-	threads = [ConsumerThread("murcnvepachedu")]
+	threads = [ConsumerThread("orlawv027")]
 	for thread in threads:
 		thread.start()

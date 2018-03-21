@@ -8,9 +8,9 @@ def pushToQueue(streamData,queueName):
 	resultMessage = dict()
 	resultMessage['lanid']=streamData.lanid
 	if (streamData.status == "Y"):
-		resultMessage['status']="SUCCESS"
+		resultMessage['status']="PROCESSED"
 	else:
-		resultMessage['status']="FAILURE"
+		resultMessage['status']="FAILED"
 	resultMessage['imagebagid']=streamData.id
 	resultMessage['result']=streamData.result
 

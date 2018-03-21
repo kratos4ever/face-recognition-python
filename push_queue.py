@@ -16,8 +16,8 @@ def pushToQueue(streamData,queueName):
 
 	messageString = json.dumps(resultMessage)
 
-	credentials = pika.PlainCredentials("admin", "p@ssw0rd")
-	connection = pika.BlockingConnection(pika.ConnectionParameters(host="murcnvepachedu",credentials=credentials))
+	credentials = pika.PlainCredentials("guest", "guest")
+	connection = pika.BlockingConnection(pika.ConnectionParameters(host="orlawv027",credentials=credentials))
 	channel = connection.channel()
 	channel.queue_declare(queue=queueName,durable=True)
 	channel.basic_publish(exchange='',routing_key=queueName,body=messageString)

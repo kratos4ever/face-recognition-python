@@ -1,9 +1,10 @@
 class FaceStreamData:
 
 	#stores the stream_img table data 
-	def __init__(self,lanid,id,capture_time,image,status):
+	def __init__(self,lanid,empid,id,capture_time,image,status):
 		self.lanid = lanid
 		self.id = id
+		self.empid = empid
 		self.capture_time = capture_time
 		self.image = image
 		self.status = status
@@ -19,8 +20,10 @@ class FaceStreamData:
 class FaceTrainData:
 
 	#stores the train_img table data
-	def __init__(self,lanid,id,capture_time,image):
+	def __init__(self,lanid,empid,id,capture_time,image):
 		self.lanid = lanid
+		self.id = id
+		self.empid = empid
 		self.capture_time = capture_time
 		self.image = image
 

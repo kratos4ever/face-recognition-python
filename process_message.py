@@ -26,7 +26,7 @@ def updateStatusAndResult(data):
 ### GETS THE UNPROCESSED RECORDS FROM STREAM_IMG TABLE
 def getUnProcessedStreamImages(id):
 
-	sql = " select employeeid, imagefile, date_format(createdon,'%m%d%Y_%H%i%S') as time from imagebag where imagebagid = " + id
+	sql = " select a.employeeid, a.imagefile, date_format(a.createdon,'%m%d%Y_%H%i%S') as time, b.lanid from imagebag a, employee b where a.employeeid = b.employeeid and imagebagid = " + id
 	print("SQL:" ,sql)
 	
 	nrows = cur.execute(sql)
@@ -37,17 +37,19 @@ def getUnProcessedStreamImages(id):
 			empid = data[0]
 			image = data[1]
 			capture_time = data[2]
+			lanid = data[3]
 			status = "N"
-			streamData = FaceStreamData(empid,id,capture_time,image,status)
+			streamData = FaceStreamData(lanid,empid,id,capture_time,image,status)
 
 		streamData.printData()
 	#cur.close()
 	return streamData
 
 ### gets a single training image per lanid (from the un processed records in the stream_img table) from the train_img table
-def loadTrainingImages(empid):
-
-	sql = " select b.imagebagid, b.imagefile, date_format(b.createdon,'%m%d%Y_%H%i%S') as time from imagebag b, (select max(imagebagid) as id from imagebag a where a.employeeid = '"+empid+"' and imagesourceid = '2') a where a.id = b.imagebagid  "
+def loadTrainingImages(empid,lanid):
+	#old sql with no ref to success of training image - just gets last posted training image (irrespective of its processing being successful or not)
+	#sql = " select b.imagebagid, b.imagefile, date_format(b.createdon,'%m%d%Y_%H%i%S') as time from imagebag b, (select max(imagebagid) as id from imagebag a where a.employeeid = '"+empid+"' and imagesourceid = '2') a where a.id = b.imagebagid  "
+	sql = " select b.imagebagid, b.imagefile, date_format(b.createdon,'%m%d%Y_%H%i%S') as time from imagebag b, (select max(a.imagebagid) as id from imagebag a,imageprocess_status c  where  a.imagesourceid = '2' and a.employeeid = '"+empid+"' and a.imagebagid = c.imagebagid and c.status = 'Y' and c.result like 'SUCCESS%')  d where d.id = b.imagebagid  "
 	trainData = None
 	cur = db.cursor()
 	print(sql)
@@ -59,7 +61,7 @@ def loadTrainingImages(empid):
 			image = data[1]
 			capture_time = data[2]
 
-			trainData = FaceTrainData(empid,id,capture_time,image)
+			trainData = FaceTrainData(lanid,empid,id,capture_time,image)
 
 	cur.close()
 	
@@ -94,7 +96,7 @@ def runImageProcessing(data, trainData):
 		benchImg = face_recognition.load_image_file(trainImgPath)
 		benchEnc = face_recognition.face_encodings(benchImg)[0] ## HANDLE MULTIPLE FACES IN TRAINING IMG - ERROR OUT FOR THE LANID. ALSO HANDLE NO FACES ETC
 	except Exception as e: #Have to catch all - get out
-		print("error while encoding the training/benchmark image for empid:",data.lanid , ". Error:",str(e))
+		print("error while encoding the training/benchmark image for lanid:",data.lanid , ". Error:",str(e))
 		data.result = "ERROR_PROCESSING_TRAIN_IMG"
 		data.status = "N"
 		return
@@ -138,7 +140,7 @@ def runImageProcessing(data, trainData):
 		data.printData()
 
 	except Exception as e: #catch all exception for this record
-		print("error while encoding the streaming image for empid:",data.lanid , ", imagebagid:",data.id , ". Error:",str(e))
+		print("error while encoding the streaming image for lanid:",data.lanid , ", imagebagid:",data.id , ". Error:",str(e))
 		data.result = "ERROR_PROCESSING_IMG"
 		data.status = "F"
 		return
@@ -168,9 +170,10 @@ def process(id):
 			sys.exit(0)
 
 		#Get a list of unique lanids from the above query and get the training image for each. set in a map<lanid,<object:lanid,id,image>>
-		empid = streamData.lanid
-		print("=========\ntrying to load training data for employeeid : " + empid +"\n==============")
-		trainData = loadTrainingImages(empid)
+		lanid = streamData.lanid
+		empid = streamData.empid
+		print("=========\ntrying to load training data for employeeid : " + empid +", lanid: " + lanid + "\n==============")
+		trainData = loadTrainingImages(empid,lanid)
 		
 		if(trainData is None):
 			#set the status for all the ids in the list for the lanid from faceStrmMap as "NO_TRAINING_IMAGE"

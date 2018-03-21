@@ -26,7 +26,7 @@ def updateStatusAndResult(data):
 ### GETS THE UNPROCESSED RECORDS FROM STREAM_IMG TABLE
 def getUnProcessedTrainingImage(id):
 
-	sql = " select employeeid, imagefile, date_format(createdon,'%m%d%Y_%H%i%S') as time from imagebag where imagebagid = " + id
+	sql = " select a.employeeid, a.imagefile, date_format(a.createdon,'%m%d%Y_%H%i%S') as time, b.lanid from imagebag a, employee b where a.employeeid = b.employeeid and imagebagid = " + id
 	print("SQL:" ,sql)
 	
 	nrows = cur.execute(sql)
@@ -37,17 +37,18 @@ def getUnProcessedTrainingImage(id):
 			empid = data[0]
 			image = data[1]
 			capture_time = data[2]
+			lanid = data[3]
 			status = "N"
-			streamData = FaceStreamData(empid,id,capture_time,image,status)
+			streamData = FaceStreamData(lanid,empid,id,capture_time,image,status)
 
 		streamData.printData()
 	#cur.close()
 	return streamData
 
 ### gets a single training image per lanid (from the un processed records in the stream_img table) from the train_img table
-def loadTrainingImages(empid):
+def loadTrainingImages(empid,lanid):
 
-	sql = " select b.imagebagid, b.imagefile, date_format(b.createdon,'%m%d%Y_%H%i%S') as time from imagebag b, (select max(imagebagid) as id from imagebag a where a.employeeid = '"+empid+"' and imagesourceid = '2') a where a.id = b.imagebagid  "
+	sql = " select b.imagebagid, b.imagefile, date_format(b.createdon,'%m%d%Y_%H%i%S') as time from imagebag b, (select max(a.imagebagid) as id from imagebag a,imageprocess_status c  where  a.imagesourceid = '2' and a.employeeid = '"+empid+"' and a.imagebagid = c.imagebagid and c.status = 'Y' and c.result like 'SUCCESS%')  d where d.id = b.imagebagid  "
 	trainData = None
 	cur = db.cursor()
 	print(sql)
@@ -59,7 +60,7 @@ def loadTrainingImages(empid):
 			image = data[1]
 			capture_time = data[2]
 
-			trainData = FaceTrainData(empid,id,capture_time,image)
+			trainData = FaceTrainData(lanid,empid,id,capture_time,image)
 
 	cur.close()
 	
@@ -129,7 +130,7 @@ def runImageProcessing(data, trainData):
 					else:
 						data.result = "SUCCESS_NOMATCH_PREV_TRAINING"
 				except Exception as e: #Have to catch all - do nothing - if the prev training image is bad, doesn't matter for the new training image
-					print("error while encoding the previous training/benchmark image for empid:",data.lanid , ". Error:",str(e))
+					print("error while encoding the previous training/benchmark image for lanid:",data.lanid , ". Error:",str(e))
 
 
 		elif(len(testEnc) > 1):
@@ -140,7 +141,7 @@ def runImageProcessing(data, trainData):
 		data.printData()
 
 	except Exception as e: #catch all exception for this record
-		print("error while encoding the training image for emp-id:",data.lanid , ", imagebagid:",data.id , ". Error:",str(e))
+		print("error while encoding the training image for lanid:",data.lanid , ", imagebagid:",data.id , ". Error:",str(e))
 		data.result = "ERROR_PROCESSING_IMG"
 		data.status = "F"
 		return
@@ -170,9 +171,10 @@ def process(id):
 			sys.exit(0)
 
 		#Get a list of unique lanids from the above query and get the training image for each. set in a map<lanid,<object:lanid,id,image>>
-		empid = streamData.lanid
-		print("=========\ntrying to load training data for employeeid : " + empid +"\n==============")
-		trainData = loadTrainingImages(empid)
+		lanid = streamData.lanid
+		empid = streamData.empid
+		print("=========\ntrying to load training data for employeeid : " + empid +", lanid: " + lanid + "\n==============")
+		trainData = loadTrainingImages(empid,lanid)
 		
 		runImageProcessing(streamData,trainData)
 

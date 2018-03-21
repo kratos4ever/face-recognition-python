@@ -19,6 +19,7 @@ docker images -all
 sudo docker run -d -e MODE=FaceStreaming --name bio_fstream biometric-sense/bio1:latest 
  
 sudo docker run -d -e MODE=FaceTraining --name bio_ftrain biometric-sense/bio1:latest 
+sudo docker run -e MODE=FaceTraining --name bio_ftrain biometric-sense/bio1:latest 
 
 sudo docker logs -f bio_ONE
 

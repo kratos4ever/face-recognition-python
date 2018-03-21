@@ -2,8 +2,8 @@
 echo $MODE
 
 echo "Running the consumer process for $MODE"
-FTRN="FaceStreaming"
-FSTR="FaceTraining"
+FSTR="FaceStreaming"
+FTRN="FaceTraining"
 if [[ $MODE = $FSTR ]]
 then
 	python3 -u consumer.py

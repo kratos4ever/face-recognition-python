@@ -105,10 +105,10 @@ def runImageProcessing(data, trainData):
 			data.num_faces = 1
 			data.result = "SUCCESS"
 			data.status = "Y"
-			
+
 			if trainData is None:
 				#As there is no previous training image - treat it as a success if there is only one face 
-			elif:
+			else:
 				#Create all the files
 				trainImgPath = os.path.join(lanidDir,trainDir,data.lanid+".jpg")
 				trainImg = open(trainImgPath,"wb")

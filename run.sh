@@ -6,7 +6,7 @@ FSTR="FaceStreaming"
 FTRN="FaceTraining"
 if [[ $MODE = $FSTR ]]
 then
-	python3 -u consumer.py
+	python3 -u streaming_consumer.py
 elif [[ $MODE = $FTRN ]]
 then
 	python3 -u training_consumer.py

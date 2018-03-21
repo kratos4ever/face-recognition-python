@@ -1,5 +1,5 @@
 import sys,os,pika,threading
-import process_message
+import process_facestreaming
 
 class ConsumerThread(threading.Thread):
 	def __init__(self, host, *args, **kwargs):
@@ -10,7 +10,7 @@ class ConsumerThread(threading.Thread):
 	def callback_func(self, channel, method, properties, body):
 		print("{} received '{}'".format(self.name, body.decode()))
 		id = body.decode()
-		process_message.process(id)
+		process_facestreaming.process(id)
 
 	def run(self):
 		credentials = pika.PlainCredentials("admin", "p@ssw0rd")

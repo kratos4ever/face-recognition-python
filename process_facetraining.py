@@ -3,9 +3,12 @@ import sys,os
 import time
 import datetime
 import MySQLdb
+import json
 from face_data_classes import FaceStreamData
 from face_data_classes import FaceTrainData
 import face_recognition
+import push_queue
+
 
 ### INITIALIZES THE DB CONNECTION TO MYSQL
 def initDbConnection():
@@ -48,7 +51,7 @@ def getUnProcessedTrainingImage(id):
 ### gets a single training image per lanid (from the un processed records in the stream_img table) from the train_img table
 def loadTrainingImages(empid,lanid):
 
-	sql = " select b.imagebagid, b.imagefile, date_format(b.createdon,'%m%d%Y_%H%i%S') as time from imagebag b, (select max(a.imagebagid) as id from imagebag a,imageprocess_status c  where  a.imagesourceid = '2' and a.employeeid = '"+empid+"' and a.imagebagid = c.imagebagid and c.status = 'Y' and c.result like 'SUCCESS%')  d where d.id = b.imagebagid  "
+	sql = " select b.imagebagid, b.imagefile, date_format(b.createdon,'%m%d%Y_%H%i%S') as time from imagebag b, (select max(a.imagebagid) as id from imagebag a,imageprocess_status c  where  a.imagesourceid = 2 and a.employeeid = '"+empid+"' and a.imagebagid = c.imagebagid and c.status = 'Y' and c.result like 'SUCCESS%')  d where d.id = b.imagebagid  "
 	trainData = None
 	cur = db.cursor()
 	print(sql)
@@ -179,6 +182,8 @@ def process(id):
 		runImageProcessing(streamData,trainData)
 
 		updateStatusAndResult(streamData)
+		
+		push_queue.pushToQueue(streamData,"FaceTrainStatus")
 
 	except Exception as e:
 		print("Error while processing message:", id, +". Error:",str(e))

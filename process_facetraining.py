@@ -139,6 +139,7 @@ def runImageProcessing(data, trainData):
 		elif(len(testEnc) > 1):
 			data.status = "F"
 			data.result = "FAIL_MULTIPLE_FACES"
+			data.num_faces = len(testEnc)
 
 		data.status = "Y"
 		data.printData()

@@ -27,7 +27,7 @@ def updateStatusAndResult(data):
 ### GETS THE UNPROCESSED RECORDS FROM STREAM_IMG TABLE
 def getUnProcessedStreamImages(id):
 
-	sql = " select a.employeeid, a.imagefile, date_format(a.createdon,'%m%d%Y_%H%i%S') as time, b.lanid from imagebag a, employee b where a.employeeid = b.employeeid and imagebagid = " + id
+	sql = " select a.empid, a.imagefile, date_format(a.createdon,'%m%d%Y_%H%i%S') as time, b.lanid, c.ipaddress as ip, c.systemname  from imagebag a, employee b, systemenviornment c where a.empid = b.empid and a.systemenviornmentid = c.systemenviornmentid and imagebagid = " + id
 	print("SQL:" ,sql)
 	
 	nrows = cur.execute(sql)
@@ -41,7 +41,8 @@ def getUnProcessedStreamImages(id):
 			lanid = data[3]
 			status = "N"
 			streamData = FaceStreamData(lanid,empid,id,capture_time,image,status)
-
+			streamData.ip = data[4]
+			streamData.system = data[5]
 		streamData.printData()
 	#cur.close()
 	return streamData
@@ -49,8 +50,8 @@ def getUnProcessedStreamImages(id):
 ### gets a single training image per lanid (from the un processed records in the stream_img table) from the train_img table
 def loadTrainingImages(empid,lanid):
 	#old sql with no ref to success of training image - just gets last posted training image (irrespective of its processing being successful or not)
-	#sql = " select b.imagebagid, b.imagefile, date_format(b.createdon,'%m%d%Y_%H%i%S') as time from imagebag b, (select max(imagebagid) as id from imagebag a where a.employeeid = '"+empid+"' and imagesourceid = '2') a where a.id = b.imagebagid  "
-	sql = " select b.imagebagid, b.imagefile, date_format(b.createdon,'%m%d%Y_%H%i%S') as time from imagebag b, (select max(a.imagebagid) as id from imagebag a,imageprocess_status c  where  a.imagesourceid = 2 and a.employeeid = '"+empid+"' and a.imagebagid = c.imagebagid and c.status = 'Y' and c.result like 'SUCCESS%')  d where d.id = b.imagebagid  "
+	#sql = " select b.imagebagid, b.imagefile, date_format(b.createdon,'%m%d%Y_%H%i%S') as time from imagebag b, (select max(imagebagid) as id from imagebag a where a.empid = '"+empid+"' and imagesourceid = '2') a where a.id = b.imagebagid  "
+	sql = " select b.imagebagid, b.imagefile, date_format(b.createdon,'%m%d%Y_%H%i%S') as time from imagebag b, (select max(a.imagebagid) as id from imagebag a,imageprocess_status c  where  a.imagesourceid = 2 and a.empid = '"+empid+"' and a.imagebagid = c.imagebagid and c.status = 'Y' and c.result like 'SUCCESS%')  d where d.id = b.imagebagid  "
 	trainData = None
 	cur = db.cursor()
 	print(sql)
@@ -173,7 +174,7 @@ def process(id):
 		#Get a list of unique lanids from the above query and get the training image for each. set in a map<lanid,<object:lanid,id,image>>
 		lanid = streamData.lanid
 		empid = streamData.empid
-		print("=========\ntrying to load training data for employeeid : " + empid +", lanid: " + lanid + "\n==============")
+		print("=========\ntrying to load training data for empid : " + empid +", lanid: " + lanid + "\n==============")
 		trainData = loadTrainingImages(empid,lanid)
 		
 		if(trainData is None):

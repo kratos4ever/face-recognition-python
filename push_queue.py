@@ -13,6 +13,8 @@ def pushToQueue(streamData,queueName):
 		resultMessage['status']="FAILED"
 	resultMessage['imagebagid']=streamData.id
 	resultMessage['result']=streamData.result
+	resultMessage['ip']=streamData.ip
+	resultMessage['systemname']=streamData.systemname
 
 	messageString = json.dumps(resultMessage)
 

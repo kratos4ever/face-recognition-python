@@ -28,7 +28,7 @@ def updateStatusAndResult(data):
 def getUnProcessedStreamImages(id):
 
 	sql = " select a.empid, a.imagefile, date_format(a.createdon,'%m%d%Y_%H%i%S') as time, b.lanid, c.ipaddress as ip, c.systemname  from imagebag a, employee b, systemenviornment c where a.empid = b.empid and a.systemenviornmentid = c.systemenviornmentid and imagebagid = " + id
-	print("SQL:" ,sql)
+	#print("SQL:" ,sql)
 	
 	nrows = cur.execute(sql)
 	streamData = None
@@ -54,7 +54,7 @@ def loadTrainingImages(empid,lanid):
 	sql = " select b.imagebagid, b.imagefile, date_format(b.createdon,'%m%d%Y_%H%i%S') as time from imagebag b, (select max(a.imagebagid) as id from imagebag a,imageprocess_status c  where  a.imagesourceid = 2 and a.empid = '"+empid+"' and a.imagebagid = c.imagebagid and c.status = 'Y' and c.result like 'SUCCESS%')  d where d.id = b.imagebagid  "
 	trainData = None
 	cur = db.cursor()
-	print(sql)
+	#print(sql)
 	nrows = cur.execute(sql)
 	if(nrows > 0):
 		resultset = cur.fetchall()
@@ -110,7 +110,7 @@ def runImageProcessing(data, trainData):
 	strmImg.write(data.image)
 	strmImg.close()
 
-	print("\n\n==========\nPROCESSING IMAGE: ",strmImgPath)
+	
 
 	#call face recognition for this image - this can be done as parallel for?
 	try:
@@ -174,7 +174,6 @@ def process(id):
 		#Get a list of unique lanids from the above query and get the training image for each. set in a map<lanid,<object:lanid,id,image>>
 		lanid = streamData.lanid
 		empid = streamData.empid
-		print("=========\ntrying to load training data for empid : " + empid +", lanid: " + lanid + "\n==============")
 		trainData = loadTrainingImages(empid,lanid)
 		
 		if(trainData is None):

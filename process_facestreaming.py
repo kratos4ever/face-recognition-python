@@ -15,10 +15,14 @@ def initDbConnection():
 	global cur
 	cur = db.cursor()
 
+def loadResultCodes():
+	global resultCodes = dict()
+
+
 def updateStatusAndResult(data):
-	sql = "  insert into imageprocess_status (imagebagid, imageprocessorid, processedon, status, result,num_faces) VALUES (%s,1,now(),%s,%s,%s) "
+	sql = "  insert into imageprocess_status (imagebagid, imageprocessorid, processedon, status, result,num_faces,accuracy) VALUES (%s,1,now(),%s,%s,%s,%s) "
 	cur = db.cursor()
-	cur.execute(sql,(data.id,data.status,data.result,data.num_faces))
+	cur.execute(sql,(data.id,data.status,data.result,data.num_faces,data.accuracy))
 
 	db.commit()
 	cur.close()
@@ -124,6 +128,7 @@ def runImageProcessing(data, trainData):
 		elif(len(testEnc) == 1):
 			data.num_faces = 1
 			testResults = face_recognition.face_distance(benchEnc,testEnc)
+			data.accuracy = testResults[0]
 			if(testResults[0] <0.6):
 				data.result = "SUCCESS"
 			else:
@@ -131,7 +136,10 @@ def runImageProcessing(data, trainData):
 		elif(len(testEnc) > 1):
 			testResults = face_recognition.face_distance(benchEnc,testEnc)
 			data.num_faces = len(testEnc)
+			#put the best face distance as the accuracy?
 			for rs in testResults:
+				if(data.accuracy < rs):
+					data.accuracy = rs
 				if(rs < 0.6):
 					data.result = "SUCCESS_MULTIPLE_FACES"
 					break;

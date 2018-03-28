@@ -1,6 +1,9 @@
 1. Invoke the face_recognition command from python with a batch mode? with accuracy estimates as well. 
 The accuracy setting - How to normalize it. Smaller the number - closer the match?
 
+ACcuracy equation:
+y = 98.21546 - (9.480826/-4.050239)*(1 - e^(+4.050239*x))
+
 ===WORK STEPS====
 1. Write test program to call dlib face_recognition to load images from disk and id the unkown images - DONE
 2. enhance the program to connect to the train_img table and download the images - according to the folder 
@@ -21,7 +24,6 @@ docker images -all
 sudo docker run -d -e MODE=FaceStreaming --name bio_fstream biometric-sense/bio1:latest 
 sudo docker run -d -e MODE=FaceTraining --name bio_ftrain biometric-sense/bio1:latest 
 
-sudo docker run -e MODE=FaceTraining --name bio_ftrain biometric-sense/bio1:latest 
 
 sudo docker logs -f bio_fstream
 sudo docker logs -f bio_ftrain

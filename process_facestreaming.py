@@ -20,9 +20,9 @@ def loadResultCodes():
 
 
 def updateStatusAndResult(data):
-	sql = "  insert into imageprocess_status (imagebagid, imageprocessorid, processedon, status, result,num_faces,accuracy) VALUES (%s,1,now(),%s,%s,%s,%s) "
+	sql = "  insert into imageprocess_status (imagebagid, imageprocessorid, processedon, status, result,num_faces,accuracy,distance) VALUES (%s,1,now(),%s,%s,%s,%s,%s) "
 	cur = db.cursor()
-	cur.execute(sql,(data.id,data.status,data.result,data.num_faces,data.accuracy))
+	cur.execute(sql,(data.id,data.status,data.result,data.num_faces,data.accuracy,data.distance))
 
 	db.commit()
 	cur.close()
@@ -128,7 +128,7 @@ def runImageProcessing(data, trainData):
 		elif(len(testEnc) == 1):
 			data.num_faces = 1
 			testResults = face_recognition.face_distance(benchEnc,testEnc)
-			data.accuracy = testResults[0]
+			data.distance = testResults[0]
 			if(testResults[0] <0.6):
 				data.result = "SUCCESS"
 			else:
@@ -138,8 +138,8 @@ def runImageProcessing(data, trainData):
 			data.num_faces = len(testEnc)
 			#put the best face distance as the accuracy?
 			for rs in testResults:
-				if(data.accuracy < rs):
-					data.accuracy = rs
+				if(data.distance < rs):
+					data.distance = rs
 				if(rs < 0.6):
 					data.result = "SUCCESS_MULTIPLE_FACES"
 					break;
@@ -147,6 +147,7 @@ def runImageProcessing(data, trainData):
 				data.result = "UNKNOWN_MULTIPLE_FACES"
 
 		data.status = "Y"
+		data.calcAccuracy()
 		data.printData()
 
 	except Exception as e: #catch all exception for this record

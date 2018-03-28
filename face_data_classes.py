@@ -1,3 +1,5 @@
+import math
+
 class FaceStreamData:
 
 	#stores the stream_img table data 
@@ -13,7 +15,12 @@ class FaceStreamData:
 		self.systemname="NONE"
 		self.accuracy = 0.0
 		self.num_faces = 0
+		self.distance = 0.0
 
+	def calcAccuracy(self):
+		x = self.distance
+		self.accuracy = 98.21546 - (9.480826/-4.050239)*(1 - math.exp(+4.050239*x))
+		
 	def printData(self):
 		print("Lan_ID:",self.lanid,", capture_time:",self.capture_time,",status:",self.status,",result:",self.result, ", num_faces:",self.num_faces)
 

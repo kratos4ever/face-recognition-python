@@ -16,7 +16,7 @@ def initDbConnection():
 	cur = db.cursor()
 
 def loadResultCodes():
-	global resultCodes = dict()
+	global resultCodes
 
 
 def updateStatusAndResult(data):

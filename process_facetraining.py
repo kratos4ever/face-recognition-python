@@ -8,7 +8,7 @@ from face_data_classes import FaceStreamData
 from face_data_classes import FaceTrainData
 import face_recognition
 import push_queue
-
+import const
 
 ### INITIALIZES THE DB CONNECTION TO MYSQL
 def initDbConnection():
@@ -17,10 +17,23 @@ def initDbConnection():
 	global cur
 	cur = db.cursor()
 
-def updateStatusAndResult(data):
-	sql = "  insert into imageprocess_status (imagebagid, imageprocessorid, processedon, status, result,num_faces) VALUES (%s,1,now(),%s,%s,%s) "
+def loadResultCodes():
+	global resultCodes = {}
+
 	cur = db.cursor()
-	cur.execute(sql,(data.id,data.status,data.result,data.num_faces))
+	sql = " select result_id, result_desc from results_master "
+	nrows = cur.execute(sql)
+	if(nrows > 0):
+		resultset = cur.fetchall()
+		for data in resultset:
+			resultCodes[data[1]]=data[0]
+
+	cur.close()	
+
+def updateStatusAndResult(data):
+	sql = "  insert into imageprocess_status (imagebagid, imageprocessorid, processedon, status, result,num_faces,result_id,distance,accuracy) VALUES (%s,1,now(),%s,%s,%s,%s,%s,%s) "
+	cur = db.cursor()
+	cur.execute(sql,(data.id,data.status,data.result,data.num_faces,data.resultCode,data.distance,data.accuracy))
 
 	db.commit()
 	cur.close()
@@ -52,7 +65,7 @@ def getUnProcessedTrainingImage(id):
 ### gets a single training image per lanid (from the un processed records in the stream_img table) from the train_img table
 def loadTrainingImages(empid,lanid):
 
-	sql = " select b.imagebagid, b.imagefile, date_format(b.createdon,'%m%d%Y_%H%i%S') as time from imagebag b, (select max(a.imagebagid) as id from imagebag a,imageprocess_status c  where  a.imagesourceid = 2 and a.empid = "+str(empid)+" and a.imagebagid = c.imagebagid and c.status = 'Y' and c.result like 'SUCCESS%')  d where d.id = b.imagebagid  "
+	sql = " select b.imagebagid, b.imagefile, date_format(b.createdon,'%m%d%Y_%H%i%S') as time from imagebag b, (select max(a.imagebagid) as id from imagebag a,imageprocess_status c, results_master d  where  a.imagesourceid = 2 and a.empid = "+str(empid)+" and a.imagebagid = c.imagebagid and and c.result_id = d.result_id and d.result_desc = '"+SUCCESS+"')  e where e.id = b.imagebagid  "
 	trainData = None
 	cur = db.cursor()
 	#print(sql)
@@ -103,20 +116,20 @@ def runImageProcessing(data, trainData):
 		
 
 		if(len(testEnc) == 0):
-			data.result = "FAIL_NO_FACES_FOUND"
+			data.result = NO_FACES_FOUND
 			data.status = "F"
+			data.resultCode = resultCodes[NO_FACES_FOUND]
 			data.num_faces = 0
 		elif(len(testEnc) == 1):
 			data.num_faces = 1
-			data.result = "SUCCESS"
+			data.result = SUCCESS
+			data.resultCode = resultCodes[SUCCESS]
 			data.status = "Y"
 
 			if trainData is None:
 				#As there is no previous training image - treat it as a success if there is only one face 
-				data.result = "SUCCESS"
-				data.status = "Y"
 			else:
-				#Create all the files
+				#Create prev training files and check for likeness with prev training image
 				trainImgPath = os.path.join(lanidDir,trainDir,data.lanid+".jpg")
 				trainImg = open(trainImgPath,"wb")
 				trainImg.write(trainData.image)
@@ -129,20 +142,17 @@ def runImageProcessing(data, trainData):
 					benchEnc = face_recognition.face_encodings(benchImg)[0] 
 
 					testResults = face_recognition.face_distance(benchEnc,testEnc)
-					if(testResults[0] <0.6):
-						data.result = "SUCCESS_MATCH_PREV_TRAINING"
-					else:
-						data.result = "SUCCESS_NOMATCH_PREV_TRAINING"
+					data.distance = testResults[0]
 				except Exception as e: #Have to catch all - do nothing - if the prev training image is bad, doesn't matter for the new training image
 					print("error while encoding the previous training/benchmark image for lanid:",data.lanid , ". Error:",str(e))
-
+			data.calcAccuracy()
 
 		elif(len(testEnc) > 1):
 			data.status = "F"
-			data.result = "FAIL_MULTIPLE_FACES"
+			data.result = MULTIPLE_FACES
+			data.resultCode = resultCodes[MULTIPLE_FACES]
 			data.num_faces = len(testEnc)
 
-		data.status = "Y"
 		data.printData()
 
 	except Exception as e: #catch all exception for this record
@@ -180,6 +190,8 @@ def process(id):
 		empid = streamData.empid
 		trainData = loadTrainingImages(empid,lanid)
 		
+		loadResultCodes()
+
 		runImageProcessing(streamData,trainData)
 
 		updateStatusAndResult(streamData)

@@ -10,17 +10,22 @@ class FaceStreamData:
 		self.capture_time = capture_time
 		self.image = image
 		self.status = status
-		self.result = "PROCESSING"
+		self.result = "Processing"
+		self.resultcode = 0
 		self.ip="NONE"
 		self.systemname="NONE"
 		self.accuracy = 0.0
 		self.num_faces = 0
-		self.distance = 0.0
+		self.distance = 1
 
 	def calcAccuracy(self):
 		x = self.distance
 		self.accuracy = 98.21546 - (9.480826/-4.050239)*(1 - math.exp(+4.050239*x))
-		
+		if(self.accuracy > 100):
+			self.accuracy = 100
+		elif(self.accuracy < 0):
+			self.accuracy = 0
+
 	def printData(self):
 		print("Lan_ID:",self.lanid,", capture_time:",self.capture_time,",status:",self.status,",result:",self.result, ", num_faces:",self.num_faces)
 

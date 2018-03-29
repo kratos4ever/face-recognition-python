@@ -7,6 +7,7 @@ from face_data_classes import FaceStreamData
 from face_data_classes import FaceTrainData
 import face_recognition
 import push_queue
+from const import *
 
 ### INITIALIZES THE DB CONNECTION TO MYSQL
 def initDbConnection():
@@ -16,13 +17,24 @@ def initDbConnection():
 	cur = db.cursor()
 
 def loadResultCodes():
-	global resultCodes
+	global resultCodes = {}
+
+	cur = db.cursor()
+	sql = " select result_id, result_desc from results_master "
+	nrows = cur.execute(sql)
+	if(nrows > 0):
+		resultset = cur.fetchall()
+		for data in resultset:
+			resultCodes[data[1]]=data[0]
+
+	cur.close()
+
 
 
 def updateStatusAndResult(data):
-	sql = "  insert into imageprocess_status (imagebagid, imageprocessorid, processedon, status, result,num_faces,accuracy,distance) VALUES (%s,1,now(),%s,%s,%s,%s,%s) "
+	sql = "  insert into imageprocess_status (imagebagid, imageprocessorid, processedon, status, result,num_faces,accuracy,distance,result_id) VALUES (%s,1,now(),%s,%s,%s,%s,%s,%s) "
 	cur = db.cursor()
-	cur.execute(sql,(data.id,data.status,data.result,data.num_faces,data.accuracy,data.distance))
+	cur.execute(sql,(data.id,data.status,data.result,data.num_faces,data.accuracy,data.distance,data.resultCode))
 
 	db.commit()
 	cur.close()
@@ -55,7 +67,7 @@ def getUnProcessedStreamImages(id):
 def loadTrainingImages(empid,lanid):
 	#old sql with no ref to success of training image - just gets last posted training image (irrespective of its processing being successful or not)
 	#sql = " select b.imagebagid, b.imagefile, date_format(b.createdon,'%m%d%Y_%H%i%S') as time from imagebag b, (select max(imagebagid) as id from imagebag a where a.empid = '"+empid+"' and imagesourceid = '2') a where a.id = b.imagebagid  "
-	sql = " select b.imagebagid, b.imagefile, date_format(b.createdon,'%m%d%Y_%H%i%S') as time from imagebag b, (select max(a.imagebagid) as id from imagebag a,imageprocess_status c  where  a.imagesourceid = 2 and a.empid = "+str(empid)+" and a.imagebagid = c.imagebagid and c.status = 'Y' and c.result like 'SUCCESS%')  d where d.id = b.imagebagid  "
+	sql = " select b.imagebagid, b.imagefile, date_format(b.createdon,'%m%d%Y_%H%i%S') as time from imagebag b, (select max(a.imagebagid) as id from imagebag a,imageprocess_status c, results_master d  where  a.imagesourceid = 2 and a.empid = "+str(empid)+" and a.imagebagid = c.imagebagid and and c.result_id = d.result_id and d.result_desc = '"+SUCCESS+"')  e where e.id = b.imagebagid  "
 	trainData = None
 	cur = db.cursor()
 	#print(sql)
@@ -123,16 +135,19 @@ def runImageProcessing(data, trainData):
 		
 
 		if(len(testEnc) == 0):
-			data.result = "NO_FACES_FOUND"
+			data.result = NO_FACES_FOUND
+			data.resultCode = resultCodes[NO_FACES_FOUND]
 			data.num_faces = 0
 		elif(len(testEnc) == 1):
 			data.num_faces = 1
 			testResults = face_recognition.face_distance(benchEnc,testEnc)
 			data.distance = testResults[0]
 			if(testResults[0] <0.6):
-				data.result = "SUCCESS"
+				data.result = SUCCESS
+				data.resultCode = resultCodes[SUCCESS]
 			else:
-				data.result = "UNKNOWN_PERSON"
+				data.result = UNKNOWN_PERSON
+				data.resultCodes = resultCodes[UNKNOWN_PERSON]
 		elif(len(testEnc) > 1):
 			testResults = face_recognition.face_distance(benchEnc,testEnc)
 			data.num_faces = len(testEnc)
@@ -141,10 +156,12 @@ def runImageProcessing(data, trainData):
 				if(data.distance < rs):
 					data.distance = rs
 				if(rs < 0.6):
-					data.result = "SUCCESS_MULTIPLE_FACES"
+					data.result = KNOWN_MULTIPLE_FACES
+					data.resultCode = resultCodes[KNOWN_MULTIPLE_FACES]
 					break;
-			if(data.result != "SUCCESS_MULTIPLE_FACES"):
-				data.result = "UNKNOWN_MULTIPLE_FACES"
+			if(data.result != KNOWN_MULTIPLE_FACES):
+				data.result = MULTIPLE_FACES
+				data.resultCode = resultCodes[MULTIPLE_FACES]
 
 		data.status = "Y"
 		data.calcAccuracy()
@@ -152,7 +169,8 @@ def runImageProcessing(data, trainData):
 
 	except Exception as e: #catch all exception for this record
 		print("error while encoding the streaming image for lanid:",data.lanid , ", imagebagid:",data.id , ". Error:",str(e))
-		data.result = "ERROR_PROCESSING_IMG"
+		data.result = ERROR_PROCESSING_IMAGE
+		data.resultCode = resultCodes[ERROR_PROCESSING_IMAGE]
 		data.status = "F"
 		return
 		#delete the image as the processing is done
@@ -185,9 +203,12 @@ def process(id):
 		empid = streamData.empid
 		trainData = loadTrainingImages(empid,lanid)
 		
+		loadResultCodes()
+
 		if(trainData is None):
 			#set the status for all the ids in the list for the lanid from faceStrmMap as "NO_TRAINING_IMAGE"
-			streamData.result = "NO_TRAINING_IMAGE"
+			streamData.result = NO_BASELINE_IMAGE
+			streamData.resultCode = resultCodes[NO_BASELINE_IMAGE]
 			streamData.status = "F"
 		else:
 			runImageProcessing(streamData,trainData)

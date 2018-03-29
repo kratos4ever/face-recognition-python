@@ -8,7 +8,7 @@ from face_data_classes import FaceStreamData
 from face_data_classes import FaceTrainData
 import face_recognition
 import push_queue
-import const
+from const import *
 
 ### INITIALIZES THE DB CONNECTION TO MYSQL
 def initDbConnection():

@@ -11,7 +11,7 @@ class FaceStreamData:
 		self.image = image
 		self.status = status
 		self.result = "Processing"
-		self.resultcode = 0
+		self.resultCode = 0
 		self.ip="NONE"
 		self.systemname="NONE"
 		self.accuracy = 0.0

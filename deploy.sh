@@ -1,4 +1,4 @@
-cd ~/bio-source
+cd ~/bio-source/
 sudo docker rm $(sudo docker stop $(sudo docker ps -a -q --filter name=bio_* --format="{{.ID}}"))
 cd ~/bio-source/face-recognition-python
 git pull

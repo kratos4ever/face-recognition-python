@@ -16,9 +16,13 @@ def initDbConnection():
 	global cur
 	cur = db.cursor()
 
-def loadResultCodes():
+def loadConfig():
 	global resultCodes
 	resultCodes = {}
+	global DISTANCE_THRESHOLD
+	DISTANCE_THRESHOLD = 0.6
+	global processor_config
+	processor_config = {}
 
 	cur = db.cursor()
 	sql = " select result_id, result_desc from results_master "
@@ -28,6 +32,15 @@ def loadResultCodes():
 		for data in resultset:
 			resultCodes[data[1]]=data[0]
 
+	sql = " select key,value from imageprocessor_config where imageprocessor_id = 1 "
+	nrows = cur.execute(sql)
+	if(nrows > 0):
+		resultset = cur.fetchall()
+		for data in resultset:
+			processor_config[data[0]]=data[1]
+
+	DISTANCE_THRESHOLD = float(processor_config["DISTANCE_THRESHOLD"])
+	
 	cur.close()
 
 
@@ -143,7 +156,7 @@ def runImageProcessing(data, trainData):
 			data.num_faces = 1
 			testResults = face_recognition.face_distance(benchEnc,testEnc)
 			data.distance = testResults[0]
-			if(testResults[0] <0.6):
+			if(testResults[0] < DISTANCE_THRESHOLD):
 				data.result = SUCCESS
 				data.resultCode = resultCodes[SUCCESS]
 			else:
@@ -156,7 +169,7 @@ def runImageProcessing(data, trainData):
 			for rs in testResults:
 				if(data.distance < rs):
 					data.distance = rs
-				if(rs < 0.6):
+				if(rs < DISTANCE_THRESHOLD):
 					data.result = KNOWN_MULTIPLE_FACES
 					data.resultCode = resultCodes[KNOWN_MULTIPLE_FACES]
 					break;
@@ -204,7 +217,7 @@ def process(id):
 		empid = streamData.empid
 		trainData = loadTrainingImages(empid,lanid)
 		
-		loadResultCodes()
+		loadConfig()
 
 		if(trainData is None):
 			#set the status for all the ids in the list for the lanid from faceStrmMap as "NO_TRAINING_IMAGE"

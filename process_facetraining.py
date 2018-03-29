@@ -17,7 +17,7 @@ def initDbConnection():
 	global cur
 	cur = db.cursor()
 
-def loadResultCodes():
+def loadConfig():
 	global resultCodes
 	resultCodes = {}
 
@@ -191,7 +191,7 @@ def process(id):
 		empid = streamData.empid
 		trainData = loadTrainingImages(empid,lanid)
 		
-		loadResultCodes()
+		loadConfig()
 
 		runImageProcessing(streamData,trainData)
 

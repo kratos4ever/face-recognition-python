@@ -1,4 +1,4 @@
-SUCESS = "Success"
+SUCCESS = "Success"
 NO_FACES_FOUND = "No Faces Found"
 ERROR_PROCESSING_IMAGE = "Error Processing Image"
 NO_BASELINE_IMAGE = "No Baseline Image"

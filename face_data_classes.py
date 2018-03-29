@@ -21,7 +21,7 @@ class FaceStreamData:
 	def calcAccuracy(self):
 		x = self.distance
 		# self.accuracy = 98.21546 - (9.480826/-4.050239)*(1 - math.exp(+4.050239*x))  #initial eqn gives 0.66 as 66 percent, 0.72 as 57 percent
-		 self.accuracy = 99.98174 - (16.45671/-2.444457)*(1 - math.exp(+2.444457*x))
+		self.accuracy = 99.98174 - (16.45671/-2.444457)*(1 - math.exp(+2.444457*x))
 
 		if(self.accuracy > 100):
 			self.accuracy = 100

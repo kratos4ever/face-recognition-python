@@ -2,7 +2,27 @@
 The accuracy setting - How to normalize it. Smaller the number - closer the match?
 
 ACcuracy equation:
+EQN 1--------------
 y = 98.21546 - (9.480826/-4.050239)*(1 - e^(+4.050239*x))
+Values:
+# self.accuracy = 98.21546 - (9.480826/-4.050239)*(1 - math.exp(+4.050239*x))  #initial eqn gives 0.66 as 66 percent, 0.72 as 57 percent
+
+EQN 2-----------------
+		 self.accuracy = 99.98174 - (16.45671/-2.444457)*(1 - math.exp(+2.444457*x))
+
+        0                  100        
+        0.6                 77        
+        0.64                75        
+        0.66                73        
+        0.7                 70        
+        0.72                67        
+Predicted:
+ 0.8718135     		50
+     0.75          64.035
+     0.8           59.13
+
+EQN 3-------------------
+
 
 ===WORK STEPS====
 1. Write test program to call dlib face_recognition to load images from disk and id the unkown images - DONE

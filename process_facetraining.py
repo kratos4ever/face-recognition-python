@@ -66,7 +66,7 @@ def getUnProcessedTrainingImage(id):
 ### gets a single training image per lanid (from the un processed records in the stream_img table) from the train_img table
 def loadTrainingImages(empid,lanid):
 
-	sql = " select b.imagebagid, b.imagefile, date_format(b.createdon,'%m%d%Y_%H%i%S') as time from imagebag b, (select max(a.imagebagid) as id from imagebag a,imageprocess_status c, results_master d  where  a.imagesourceid = 2 and a.empid = "+str(empid)+" and a.imagebagid = c.imagebagid and and c.result_id = d.result_id and d.result_desc = '"+SUCCESS+"')  e where e.id = b.imagebagid  "
+	sql = " select b.imagebagid, b.imagefile, date_format(b.createdon,'%m%d%Y_%H%i%S') as time from imagebag b, (select max(a.imagebagid) as id from imagebag a,imageprocess_status c, results_master d  where  a.imagesourceid = 2 and a.empid = "+str(empid)+" and a.imagebagid = c.imagebagid and  c.result_id = d.result_id and d.result_desc = '"+SUCCESS+"')  e where e.id = b.imagebagid  "
 	trainData = None
 	cur = db.cursor()
 	#print(sql)
@@ -200,7 +200,7 @@ def process(id):
 		push_queue.pushToQueue(streamData,"FaceTrainStatus")
 
 	except Exception as e:
-		print("Error while processing message:", id, +". Error:",str(e))
+		print("Error while processing message:", id, ". Error:",str(e))
 	
 
 	

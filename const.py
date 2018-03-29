@@ -1,0 +1,8 @@
+global SUCESS = "Success"
+global NO_FACES_FOUND = "No Faces Found"
+global ERROR_PROCESSING_IMAGE = "Error Processing Image"
+global NO_BASELINE_IMAGE = "No Baseline Image"
+global UNKNOWN_PERSON = "Unknown Person"
+global MULTIPLE_FACES = "Multiple Faces"
+global KNOWN_MULTIPLE_FACES = "Known Multiple Faces"
+global PROCESSING = "Processing"

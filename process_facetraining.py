@@ -58,7 +58,7 @@ def getUnProcessedTrainingImage(id):
 			status = "N"
 			streamData = FaceStreamData(lanid,empid,id,capture_time,image,status)
 			streamData.ip = data[4]
-			streamData.system = data[5]
+			streamData.systemname = data[5]
 		streamData.printData()
 	#cur.close()
 	return streamData

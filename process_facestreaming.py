@@ -32,7 +32,7 @@ def loadConfig():
 		for data in resultset:
 			resultCodes[data[1]]=data[0]
 
-	sql = " select key,value from imageprocessor_config where imageprocessor_id = 1 "
+	sql = " select prop_key,prop_value from imageprocessor_config where imageprocessor_id = 1 "
 	nrows = cur.execute(sql)
 	if(nrows > 0):
 		resultset = cur.fetchall()
@@ -40,7 +40,7 @@ def loadConfig():
 			processor_config[data[0]]=data[1]
 
 	DISTANCE_THRESHOLD = float(processor_config["DISTANCE_THRESHOLD"])
-	
+
 	cur.close()
 
 

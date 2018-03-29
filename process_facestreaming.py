@@ -148,7 +148,7 @@ def runImageProcessing(data, trainData):
 				data.resultCode = resultCodes[SUCCESS]
 			else:
 				data.result = UNKNOWN_PERSON
-				data.resultCodes = resultCodes[UNKNOWN_PERSON]
+				data.resultCode = resultCodes[UNKNOWN_PERSON]
 		elif(len(testEnc) > 1):
 			testResults = face_recognition.face_distance(benchEnc,testEnc)
 			data.num_faces = len(testEnc)

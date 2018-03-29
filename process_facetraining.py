@@ -129,6 +129,7 @@ def runImageProcessing(data, trainData):
 
 			if trainData is None:
 				#As there is no previous training image - treat it as a success if there is only one face 
+				print("No Prev  training data")
 			else:
 				#Create prev training files and check for likeness with prev training image
 				trainImgPath = os.path.join(lanidDir,trainDir,data.lanid+".jpg")

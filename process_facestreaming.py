@@ -17,7 +17,8 @@ def initDbConnection():
 	cur = db.cursor()
 
 def loadResultCodes():
-	global resultCodes = {}
+	global resultCodes
+	resultCodes = {}
 
 	cur = db.cursor()
 	sql = " select result_id, result_desc from results_master "

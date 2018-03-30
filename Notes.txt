@@ -16,3 +16,8 @@ Tensorflow test img
 
 do pip install for the following packages
 opencv-contrib-python
+==============================================
+
+MySQL db setup:
+
+CREATE USER `biometric-user`@`%` IDENTIFIED BY 'B1Om$7r1K5';

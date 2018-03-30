@@ -7,7 +7,8 @@ tables -> STREAM_IMG, TRAIN_IMG
 ==============
 
 create database biometrics;
-CREATE USER `biometric-user`@`%` IDENTIFIED BY 'B10M37R1K5';
+CREATE USER `biometric-user`@`%` IDENTIFIED BY 'B10M37R1K5'; 
+CREATE USER `biometric-user`@`%` IDENTIFIED BY 'B1Om$7r1K5';
 use biometrics
 GRANT ALL PRIVILEGES ON biometrics TO `biometric-user`@`%` WITH GRANT OPTION;
   

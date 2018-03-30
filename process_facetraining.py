@@ -32,9 +32,9 @@ def loadConfig():
 	cur.close()	
 
 def updateStatusAndResult(data):
-	sql = "  insert into imageprocess_status (imagebagid, imageprocessorid, processedon, status, result,num_faces,result_id,distance,confidence) VALUES (%s,1,now(),%s,%s,%s,%s,%s,%s) "
+	sql = "  insert into imageprocess_status (imagebagid, imageprocessorid, processedon, status, num_faces,result_id,distance,confidence) VALUES (%s,1,now(),%s,%s,%s,%s,%s) "
 	cur = db.cursor()
-	cur.execute(sql,(data.id,data.status,data.result,data.num_faces,data.resultCode,data.distance,data.accuracy))
+	cur.execute(sql,(data.id,data.status,data.num_faces,data.resultCode,data.distance,data.accuracy))
 
 	db.commit()
 	cur.close()

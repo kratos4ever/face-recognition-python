@@ -2,6 +2,8 @@
 The accuracy setting - How to normalize it. Smaller the number - closer the match?
 
 ACcuracy equation:
+source -> https://mycurvefit.com/
+
 EQN 1--------------
 y = 98.21546 - (9.480826/-4.050239)*(1 - e^(+4.050239*x))
 Values:

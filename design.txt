@@ -70,6 +70,8 @@ sudo docker rmi $(sudo docker images --filter "dangling=true" -q --no-trunc)
 Stopping and removing containers
 sudo docker rm $(sudo docker stop $(sudo docker ps -a -q --filter name=bio_* --format="{{.ID}}"))
 
+$$ SAVE AND PUSH IMAGE TO ANOTHER SERVRE BY SSH $$
+sudo docker save biometric-sense/bio1:latest | bzip2 | ssh nvep5898@cdcalv071 'bunzip2 | docker load'
 
 ==== PROGRAM DESIGN ====
 

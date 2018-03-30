@@ -38,12 +38,16 @@ RUN cd ~ && \
 # The rest of this file just runs an example script.
 
 COPY ./face_recognition/ /root/face_recognition
+COPY ./face-recognition-python/ /biometric-sense
+
+RUN cd /biometric-sense && \
+    pip3 install -r requirements.txt
+
 RUN cd /root/face_recognition && \
-    pip3 install -r requirements.txt && \
     python3 setup.py install
 
 #run cmd to query the mysql db 
-COPY ./face-recognition-python/ /biometric-sense
+
 WORKDIR /biometric-sense
 RUN chmod +x /biometric-sense/run.sh
 
